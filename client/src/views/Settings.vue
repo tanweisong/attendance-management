@@ -1,0 +1,86 @@
+<template>
+  <div class="content">
+    <b-form>
+      <div class="form-row">
+        <b-form-group label="Num. of table(s)" class="col-md-3 col-lg-3 col-xl-2">
+          <b-form-input type="number" v-model="numOfTables" number></b-form-input>
+        </b-form-group>
+        <b-form-group label="Num. of pax per table" class="col-md-3 col-lg-3 col-xl-2">
+          <b-form-input type="number" v-model="minPaxPerTable" number></b-form-input>
+        </b-form-group>
+      </div>
+      <b-button variant="outline-primary" @click="updateLogin">Update</b-button>
+    </b-form>
+  </div>
+</template>
+
+<script>
+import app from "../functions/app";
+import LoginService from "../services/LoginService";
+
+export default {
+  mixins: [app],
+  data() {
+    return {};
+  },
+  computed: {
+    numOfTables: {
+      get() {
+        const self = this;
+
+        return self.$store.getters.getNumOfTables;
+      },
+      set(value) {
+        const self = this;
+
+        self.$store.dispatch("setNumOfTables", value);
+      }
+    },
+    minPaxPerTable: {
+      get() {
+        const self = this;
+
+        return self.$store.getters.getMinPaxPerTable;
+      },
+      set(value) {
+        const self = this;
+
+        self.$store.dispatch("setMinPaxPerTable", value);
+      }
+    },
+    email() {
+      const self = this;
+
+      return self.$store.getters.getEmail();
+    }
+  },
+  methods: {
+    async updateLogin() {
+      const self = this;
+
+      var sNumOfTables = self.numOfTables;
+      var sMinPaxPerTable = self.minPaxPerTable;
+
+      if (!self.isNullOrEmpty(sNumOfTables) && !isNaN(sNumOfTables))
+        sNumOfTables = parseFloat(sNumOfTables);
+
+      if (!self.isNullOrEmpty(sMinPaxPerTable) && !isNaN(sMinPaxPerTable))
+        sMinPaxPerTable = parseFloat(sMinPaxPerTable);
+
+      const login = await LoginService.updateConfiguration({
+        minPaxPerTable: sMinPaxPerTable,
+        numOfTables: sNumOfTables,
+        email: self.email
+      });
+
+      self.$root.setLogin(login);
+    }
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.content {
+  padding: 0.5rem 1rem;
+}
+</style>
