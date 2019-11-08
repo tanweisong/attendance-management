@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import { Z_STREAM_END } from "zlib";
+import lodash from "lodash";
 
 Vue.use(Vuex);
 
@@ -160,10 +160,10 @@ export default new Vuex.Store({
   },
   getters: {
     getEmail(state) {
-      return state.login.email;
+      return _.get(state, "login.email");
     },
     getEntrances(state) {
-      return state.login.entrances;
+      return _.get(state, "login.entrances");
     },
     getIsEntranceOrScreen: (state, getters) => position => {
       const entrances = getters.getEntrances;
@@ -174,68 +174,77 @@ export default new Vuex.Store({
       else return "0";
     },
     getNumOfCols(state) {
-      return state.numOfCols;
+      return _.get(state, "numOfCols");
     },
     getNumOfRows(state) {
-      return state.numOfRows;
+      return _.get(state, "numOfRows");
     },
     getNumOfTables(state) {
-      return state.login.numOfTables;
+      return _.get(state, "login.numOfTables");
     },
     getMinPaxPerTable(state) {
-      return state.login.minPaxPerTable;
+      return _.get(state, "login.minPaxPerTable");
     },
     getScreens(state) {
-      return state.login.screens;
+      return _.get(state, "login.screens");
     },
     getTableConfigurations(state) {
-      return state.login.tableConfigurations;
+      return _.get(state, "login.tableConfigurations");
     },
     getTables(state) {
-      return state.login.tables;
+      return _.get(state, "login.tables");
     }
   },
   mutations: {
     addEntrance(state, payload) {
-      if (_.indexOf(state.login.entrances, payload) < 0)
-        state.login.entrances.push(payload);
+      let entrances = _.get(state, "login.entrances");
+      if (_.indexOf(entrances, payload) < 0) {
+        entrances.push(payload);
+        _.set(state, "login.entrances", entrances);
+      }
     },
     addScreen(state, payload) {
-      if (_.indexOf(state.login.screens, payload) < 0)
-        state.login.screens.push(payload);
+      let screens = _.get(state, "login.screens");
+      if (_.indexOf(screens, payload) < 0) {
+        screens.push(payload);
+        _.set(state, "login.screens", screens);
+      }
     },
     addTableConfigurationRow(state, payload) {
-      state.login.tableConfigurations.push(payload);
+      let tableConfigurations = _.get(state, "login.tableConfigurations");
+
+      tableConfigurations.push(payload);
+      _.set(state, "login.tableConfigurations", tableConfigurations);
     },
     clearState(state) {
       state = {};
     },
     setEntrances(state, payload) {
-      state.login.entrances = payload;
+      _.set(state, "login.entrances", payload);
     },
     setLogin(state, payload) {
-      state.login = payload;
+      _.set(state, "login", payload);
     },
     setNumOfCols(state, payload) {
-      state.numOfCols = payload;
+      _.set(state, "numOfCols", payload);
     },
     setNumOfRows(state, payload) {
-      state.numOfRows = payload;
+      _.set(state, "numOfRows", payload);
     },
     setNumOfTables(state, payload) {
-      state.login.numOfTables = payload;
+      _.set(state, "login.numOfTables", payload);
     },
     setMinPaxPerTable(state, payload) {
-      state.login.minPaxPerTable = payload;
+      _.set(state, "login.minPaxPerTable", payload);
     },
     setScreens(state, payload) {
-      state.login.screens = [];
+      _.set(state, "login.screens", []);
     },
     setTableConfigurations(state, payload) {
-      state.login.tableConfigurations = payload;
+      _.set(state, "login.tableConfigurations", payload);
     },
     setTables(state, payload) {
-      state.login.tables = payload;
+      _.set(state, "login.tables", payload);
     }
   }
 });

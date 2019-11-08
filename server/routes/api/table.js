@@ -62,6 +62,29 @@ router.post("/", async (req, res) => {
   res.send(login);
 });
 
+router.post("/search", async (req, res) => {
+  const logins = await loadLoginCollection();
+  const email = req.body.email;
+  const searchVal = req.body.searchVal;
+  const login = await logins
+    .aggregate([
+      { $match: { email: "tan.weisong@gmail.com" } },
+      {
+        $lookup: {
+          from: "tables",
+          pipeline: [
+            { $match: { value: "Beck", $expr: { $in: ["$name", "$email"] } } }
+          ],
+          as: "tables"
+        }
+      },
+      { $project: { _id: 1, tables: 1 } }
+    ])
+    .toArray();
+
+  res.send(login);
+});
+
 router.put("/", async (req, res) => {
   const tables = await loadTableCollection();
 

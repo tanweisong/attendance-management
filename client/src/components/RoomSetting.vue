@@ -145,19 +145,34 @@
             <col
               v-for="field in scope.fields"
               :key="field.key"
-              :style="{ width: (field.key === 'action') ? '40px' : (field.key === 'pax') ? '75px' : 'auto' }"
+              :style="{ width: (field.key === 'action') ? '40px' : (_.indexOf(['pax','child','adult'],field.key) > -1) ? '75px' : 'auto' }"
             />
           </template>
           <template v-slot:cell(name)="row">
             <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)"></b-form-input>
           </template>
-          <template v-slot:cell(pax)="row">
+          <template v-slot:cell(adult)="row">
             <b-form-input
               type="number"
-              v-model="row.item.pax"
+              v-model="row.item.adult"
+              @change="onPaxChange(table, row.item)"
               size="sm"
-              @change="addNewGuest(table)"
+              min="0"
+              number
             ></b-form-input>
+          </template>
+          <template v-slot:cell(child)="row">
+            <b-form-input
+              type="number"
+              v-model="row.item.child"
+              @change="onPaxChange(table, row.item)"
+              size="sm"
+              min="0"
+              number
+            ></b-form-input>
+          </template>
+          <template v-slot:cell(pax)="row">
+            <b-form-input type="number" v-model="row.item.pax" size="sm" disabled number></b-form-input>
           </template>
           <template v-slot:cell(action)="row">
             <b-button
@@ -216,9 +231,12 @@ export default {
       callback();
     };
     return {
+      paxChangeDebounce: null,
       mode: "edit",
       fields: [
         "name",
+        "adult",
+        "child",
         "pax",
         {
           key: "action",
@@ -463,6 +481,35 @@ export default {
 
       _.set(table, "guests", aGuests);
     },
+    onPaxChange(table, guest) {
+      const self = this;
+
+      if (!self.isNull(self.paxChangeDebounce)) {
+        self.paxChangeDebounce.cancel;
+      }
+
+      self.paxChangeDebounce = _.debounce(function() {
+        let adults = guest.adult;
+        let children = guest.child;
+        let pax = "";
+
+        if (self.isNullOrEmpty(children) && self.isNullOrEmpty(adults))
+          pax = "";
+        else {
+          if (self.isNullOrEmpty(adults)) adults = 0;
+
+          if (self.isNullOrEmpty(children)) children = 0;
+
+          pax = adults + children;
+        }
+
+        _.set(guest, "pax", pax);
+
+        self.addNewGuest(table);
+      }, 500);
+
+      self.paxChangeDebounce();
+    },
     async selectionCancel(position) {
       const self = this;
 
@@ -580,7 +627,6 @@ export default {
           // An error occurred
         });
     },
-
     async selectionUpdate(position) {
       const self = this;
 
@@ -631,8 +677,11 @@ export default {
     tableConfiguration(configuration) {
       const self = this;
 
-      self.table = _.pick(configuration, ["row", "col", "guests", "name"]);
-      self.$set(self.table, "tableId", configuration._id);
+      self.$set(self.table, "row", _.get(configuration, "row"));
+      self.$set(self.table, "col", _.get(configuration, "col"));
+      self.$set(self.table, "guests", _.get(configuration, "guests"));
+      self.$set(self.table, "name", _.get(configuration, "name"));
+      self.$set(self.table, "tableId", _.get(configuration, "_id"));
 
       self.addNewGuest(self.table);
 

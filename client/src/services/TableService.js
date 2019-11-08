@@ -36,6 +36,19 @@ class TableService {
         const data = res.data;
 
         resolve(data);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  static searchTables(oData) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res = await axios.post(url + "/search", oData);
+        const data = res.data;
+
+        resolve(data);
       } catch (error) {
         reject(err);
       }

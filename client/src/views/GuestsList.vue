@@ -2,7 +2,7 @@
   <div class="content">
     <header>
       <b-form inline class="mb-4">
-        <label class="mr-sm-2" for="search">Search:</label>
+        <label class="mr-sm-2" for="search" label-size="sm">Search:</label>
         <b-form-input
           type="search"
           id="search"
@@ -11,11 +11,12 @@
           @blur="searchTables"
           @keypress.enter="searchTables"
           v-model="searchVal"
+          size="sm"
         ></b-form-input>
-        <b-button variant="outline-secondary" class="mr-sm-2">
+        <b-button variant="outline-secondary" class="mr-sm-2" size="sm">
           <font-awesome-icon icon="search" />
         </b-button>
-        <b-button variant="outline-primary" @click="updateTables">Save Changes</b-button>
+        <b-button variant="outline-primary" @click="updateTables" size="sm">Save Changes</b-button>
       </b-form>
     </header>
     <b-card-group columns>
@@ -36,11 +37,10 @@
               <col
                 v-for="field in scope.fields"
                 :key="field.key"
-                :style="{ width: (field.key === 'action') ? '80px' : (field.key === 'pax') ? '75px' :  (field.key === 'checkin') ? '40px' : 'auto' }"
+                :style="{ width: (field.key === 'action') ? '80px' : (_.indexOf(['pax', 'adult', 'child'], field.key) > -1) ? '75px' :  (field.key === 'checkin') ? '40px' : 'auto' }"
               />
             </template>
             <template v-slot:cell(checkin)="row">
-              <!-- <b-form-checkbox disabled inline></b-form-checkbox> -->
               <b-button
                 id="tooltip-button-variant"
                 variant="outline-info"
@@ -61,17 +61,32 @@
             <template v-slot:cell(contact)="row">
               <b-form-input v-model="row.item.contact" size="sm"></b-form-input>
             </template>
-            <template v-slot:cell(pax)="row">
+            <template v-slot:cell(adult)="row">
               <b-form-input
                 type="number"
-                v-model="row.item.pax"
+                v-model="row.item.adult"
                 size="sm"
                 number
-                @change="addNewGuest(table)"
+                min="0"
+                @change="onPaxChange(table, row.item)"
               ></b-form-input>
+            </template>
+            <template v-slot:cell(child)="row">
+              <b-form-input
+                type="number"
+                v-model="row.item.child"
+                size="sm"
+                number
+                min="0"
+                @change="onPaxChange(table, row.item)"
+              ></b-form-input>
+            </template>
+            <template v-slot:cell(pax)="row">
+              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
             </template>
             <template v-slot:cell(action)="row">
               <b-button
+                :disabled="(isNullOrEmpty(row.item.name) || isNullOrEmpty(row.item._id))"
                 size="sm"
                 variant="outline-primary"
                 class="mr-2"
@@ -82,7 +97,7 @@
               <b-button
                 size="sm"
                 variant="outline-danger"
-                :disabled="!(table.guests.length > 1)"
+                :disabled="!(table.guests.length > 1) || isNullOrEmpty(row.item.name)"
                 @click="deleteGuest(table, row.item, row.index)"
               >
                 <font-awesome-icon icon="trash" />
@@ -124,7 +139,8 @@ export default {
     return {
       mode: "edit",
       guest: {},
-      searchVal: ""
+      searchVal: "",
+      paxChangeDebounce: null
     };
   },
   computed: {
@@ -145,6 +161,8 @@ export default {
         return [
           "name",
           "contact",
+          "adult",
+          "child",
           "pax",
           {
             key: "action",
@@ -159,6 +177,8 @@ export default {
           },
           "name",
           "contact",
+          "adult",
+          "child",
           "pax",
           {
             key: "action",
@@ -207,6 +227,8 @@ export default {
         aGuests.push({
           name: null,
           email: null,
+          adult: null,
+          child: null,
           pax: null
         });
 
@@ -269,16 +291,46 @@ export default {
           // An error occurred
         });
     },
+    onPaxChange(table, guest) {
+      const self = this;
+
+      if (!self.isNull(self.paxChangeDebounce)) {
+        self.paxChangeDebounce.cancel;
+      }
+
+      self.paxChangeDebounce = _.debounce(function() {
+        let adults = guest.adult;
+        let children = guest.child;
+        let pax = "";
+
+        if (self.isNullOrEmpty(children) && self.isNullOrEmpty(adults))
+          pax = "";
+        else {
+          if (self.isNullOrEmpty(adults)) adults = 0;
+
+          if (self.isNullOrEmpty(children)) children = 0;
+
+          pax = adults + children;
+        }
+
+        _.set(guest, "pax", pax);
+
+        self.addNewGuest(table);
+      }, 500);
+
+      self.paxChangeDebounce();
+    },
     tableConfigurationShown() {
       const self = this;
       const container = document.getElementById("qrcodeContainer");
       const guest = self.guest;
       const guestId = _.get(guest, "_id");
 
-      QRCode.toCanvas(
-        container,
-        document.location.origin + "/register/" + guestId
-      );
+      if (!self.isNullOrEmpty(guestId))
+        QRCode.toDataURL(
+          container,
+          document.location.origin + "/register/" + guestId
+        ).then(response => {});
     },
     generateQRCode(guest, index) {
       const self = this;
@@ -290,7 +342,6 @@ export default {
     searchTables() {
       const self = this;
       const searchVal = self.searchVal;
-      var aTables = self.tables;
     },
     async createTables() {
       const self = this;
