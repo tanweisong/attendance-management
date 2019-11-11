@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = "http://localhost:5000/api/table";
+const url = "api/table";
 
 class TableService {
   static getTables(email) {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const url = "http://localhost:5000/api/login";
+const url = "api/login";
 
 class LoginService {
   static createLogin(email, password) {
