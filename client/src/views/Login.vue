@@ -36,15 +36,20 @@
         </div>
       </div>
     </div>
+    <loader></loader>
   </div>
 </template>
 
 <script>
 import LoginService from "../services/LoginService";
 import app from "../functions/app";
+import Loader from "../components/Loader";
 
 export default {
   name: "Login",
+  components: {
+    Loader
+  },
   mixins: [app],
   data() {
     return {
@@ -62,12 +67,16 @@ export default {
       if (_.isArray(login)) login = login[0];
 
       await self.$store.dispatch("setLogin", login);
+      let email = _.get(login, "email");
 
-      if (!self.isNullOrEmpty(login)) {
+      self.$store.dispatch("setShowLoader", false);
+
+      if (!self.isNullOrEmpty(email)) {
         self.$router.push({
           path: "/home/layout"
         });
       } else {
+        self.open = false;
         self.error = true;
         self.errorMessage = "Invalid username/password";
       }
@@ -84,7 +93,10 @@ export default {
       ) {
         self.error = true;
         self.errorMessage = "Invalid username/password";
-      } else self.getLogin();
+      } else {
+        self.$store.dispatch("setShowLoader", true);
+        self.getLogin();
+      }
     },
     register() {
       const self = this;

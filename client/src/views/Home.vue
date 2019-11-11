@@ -30,7 +30,7 @@ export default {
   methods: {
     logout() {
       const self = this;
-      self.$root.clearState();
+      self.$store.dispatch("clearState");
       self.$router.push({
         name: "login"
       });
@@ -38,7 +38,7 @@ export default {
   },
   mounted() {
     const self = this;
-    const login = self.$root.getLogin();
+    const login = self.$store.getters.getLogin;
 
     if (self.isNull(login))
       self.$router.push({

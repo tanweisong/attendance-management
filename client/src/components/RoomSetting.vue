@@ -196,6 +196,7 @@
         <b-button size="sm" variant="outline-primary" @click="updateTableConfiguration">OK</b-button>
       </template>
     </b-modal>
+    <loader></loader>
   </div>
 </template>
 
@@ -203,6 +204,7 @@
 import app from "../functions/app";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import Loader from "../components/Loader";
 import LoginService from "../services/LoginService";
 import TableService from "../services/TableService";
 
@@ -211,6 +213,9 @@ library.add(faCheck);
 export default {
   name: "room-setting",
   mixins: [app],
+  components: {
+    Loader
+  },
   props: {
     tableConfigurations: {
       type: Array
@@ -357,7 +362,6 @@ export default {
     },
     selectableTables() {
       const self = this;
-      const login = self.$root.getLogin();
       const tables = self.$store.getters.getTables;
 
       var aSelectableTables = _.filter(tables, function(table) {
@@ -747,6 +751,8 @@ export default {
         }
       }
 
+      self.$store.dispatch("setShowLoader", true);
+
       var login = await TableService.updateTables({
         email,
         tables: [
@@ -764,6 +770,8 @@ export default {
       await self.$store.dispatch("setLogin", login);
 
       self.$refs["tableConfiguration"].hide();
+
+      self.$store.dispatch("setShowLoader", false);
     }
   }
 };

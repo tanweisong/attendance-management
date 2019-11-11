@@ -55,12 +55,14 @@ export default {
     email() {
       const self = this;
 
-      return self.$store.getters.getEmail();
+      return self.$store.getters.getEmail;
     }
   },
   methods: {
     async updateLogin() {
       const self = this;
+
+      self.$store.dispatch("setShowLoader", true);
 
       var sNumOfTables = self.numOfTables;
       var sMinPaxPerTable = self.minPaxPerTable;
@@ -78,6 +80,8 @@ export default {
       });
 
       self.$root.setLogin(login);
+
+      self.$store.dispatch("setShowLoader", false);
     }
   }
 };

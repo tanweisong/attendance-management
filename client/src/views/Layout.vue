@@ -36,17 +36,19 @@
             </b-form-group>
           </div>
         </div>
-        <b-button variant="outline-primary" class="btn-sm" @click="update()">Update</b-button>
+        <b-button variant="outline-primary" class="btn-sm" @click="update">Update</b-button>
       </b-form>
     </div>
     <div class="content">
       <room-setting :tableConfigurations="tableConfigurations" :numOfCols="numOfCols"></room-setting>
     </div>
+    <loader></loader>
   </div>
 </template>
 
 <script>
 import app from "../functions/app";
+import Loader from "../components/Loader";
 import RoomSetting from "../components/RoomSetting";
 import LoginService from "../services/LoginService";
 import TableService from "../services/TableService";
@@ -54,7 +56,8 @@ import TableService from "../services/TableService";
 export default {
   mixins: [app],
   components: {
-    RoomSetting
+    RoomSetting,
+    Loader
   },
   data() {
     return {
@@ -127,7 +130,7 @@ export default {
       const email = self.$store.getters.getEmail;
 
       var login = await TableService.createTables({
-        email: self.email,
+        email,
         tables: aTables
       });
 
@@ -147,19 +150,22 @@ export default {
       });
 
       if (self.isNull(invalidKeys)) {
+        self.$store.dispatch("setShowLoader", true);
         self.updateLogin();
       }
     },
     async updateLogin() {
       const self = this;
-      const login = await LoginService.updateConfiguration({
-        email: self.email,
+      let login = await LoginService.updateConfiguration({
+        email: self.$store.getters.getEmail,
         tableConfigurations: self.tableConfigurations
       });
 
       if (_.isArray(login)) login = login[0];
 
       self.$store.dispatch("setLogin", login);
+
+      self.$store.dispatch("setShowLoader", false);
     },
     mappingValueChange: function() {
       const self = this;

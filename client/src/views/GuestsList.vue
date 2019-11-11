@@ -120,12 +120,14 @@
       </div>
       <template v-slot:modal-footer></template>
     </b-modal>
+    <loader></loader>
   </div>
 </template>
 
 <script>
 import app from "../functions/app";
 import QRCode from "qrcode";
+import Loader from "../components/Loader";
 import LoginService from "../services/LoginService";
 import TableService from "../services/TableService";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -135,6 +137,9 @@ library.add(faSearch, faCheck, faQrcode);
 
 export default {
   mixins: [app],
+  components: {
+    Loader
+  },
   data() {
     return {
       mode: "edit",
@@ -411,6 +416,8 @@ export default {
         }
       }
 
+      self.$store.dispatch("setShowLoader", true);
+
       var login = await TableService.updateTables({
         email: self.email,
         tables: self.tables
@@ -421,6 +428,7 @@ export default {
       await self.$store.dispatch("setLogin", login);
 
       self.updateGuestList();
+      self.$store.dispatch("setShowLoader", false);
 
       this.$bvToast.toast("Changes saved successfully", {
         autoHideDelay: 5000

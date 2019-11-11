@@ -8,7 +8,8 @@ export default new Vuex.Store({
   state: {
     login: null,
     numOfCols: null,
-    numOfRows: null
+    numOfRows: null,
+    showLoader: false
   },
   actions: {
     async addEntrance(context, payload) {
@@ -36,24 +37,25 @@ export default new Vuex.Store({
     async setLogin(context, payload) {
       const tablesIsEmpty = await context.dispatch(
         "isNullOrEmpty",
-        payload.tables
+        _.get(payload, "tables")
       );
       const tableConfigurationsIsEmpty = await context.dispatch(
         "isNullOrEmpty",
-        payload.tableConfigurations
+        _.get(payload, "tableConfigurations")
       );
       const screensIsEmpty = await context.dispatch(
         "isNullOrEmpty",
-        payload.screens
+        _.get(payload, "screens")
       );
       const entrancesIsEmpty = await context.dispatch(
         "isNullOrEmpty",
-        payload.entrances
+        _.get(payload, "entrances")
       );
 
-      if (screensIsEmpty) payload["screens"] = [];
+      if (screensIsEmpty && _.has(payload, "screens")) payload["screens"] = [];
 
-      if (entrancesIsEmpty) payload["entrances"] = [];
+      if (entrancesIsEmpty && _.has(payload, "entrances"))
+        payload["entrances"] = [];
 
       var iNumOfRows = null;
       var iNumOfCols = null;
@@ -151,6 +153,9 @@ export default new Vuex.Store({
     setMinPaxPerTable(context, payload) {
       context.commit("setMinPaxPerTable", payload);
     },
+    setShowLoader(context, payload) {
+      context.commit("setShowLoader", payload);
+    },
     setTableConfigurations(context, payload) {
       context.commit("setTableConfigurations", payload);
     },
@@ -173,6 +178,9 @@ export default new Vuex.Store({
       if (_.indexOf(screens, position) > -1) return "2";
       else return "0";
     },
+    getLogin(state) {
+      return _.get(state, "login");
+    },
     getNumOfCols(state) {
       return _.get(state, "numOfCols");
     },
@@ -187,6 +195,9 @@ export default new Vuex.Store({
     },
     getScreens(state) {
       return _.get(state, "login.screens");
+    },
+    getShowLoader(state) {
+      return _.get(state, "showLoader");
     },
     getTableConfigurations(state) {
       return _.get(state, "login.tableConfigurations");
@@ -239,6 +250,9 @@ export default new Vuex.Store({
     },
     setScreens(state, payload) {
       _.set(state, "login.screens", []);
+    },
+    setShowLoader(state, payload) {
+      _.set(state, "showLoader", payload);
     },
     setTableConfigurations(state, payload) {
       _.set(state, "login.tableConfigurations", payload);

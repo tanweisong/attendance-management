@@ -27,16 +27,5 @@ Vue.config.productionTip = false;
 new Vue({
   router,
   store,
-  render: h => h(App),
-  methods: {
-    clearState() {
-      store.commit("clearState");
-    },
-    getLogin() {
-      return store.state.login;
-    },
-    setLogin(login, self) {
-      store.commit("setLogin", { login, self });
-    }
-  }
+  render: h => h(App)
 }).$mount("#app");

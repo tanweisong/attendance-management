@@ -67,20 +67,25 @@ router.post("/search", async (req, res) => {
   const email = req.body.email;
   const searchVal = req.body.searchVal;
   const login = await logins
-    .aggregate([
-      { $match: { email: "tan.weisong@gmail.com" } },
-      {
-        $lookup: {
-          from: "tables",
-          pipeline: [
-            { $match: { value: "Beck", $expr: { $in: ["$name", "$email"] } } }
-          ],
-          as: "tables"
-        }
-      },
-      { $project: { _id: 1, tables: 1 } }
-    ])
+    .aggregate([{ $match: { email: sLoginEmail } }])
     .toArray();
+
+  // db.tables.find({
+  //   $and: [
+  //     {
+  //       $or: [
+  //         { name: { $regex: /^Table 1/i, $options: "si" } },
+  //         {
+  //           guests: {
+  //             $elemMatch: { name: { $regex: /^Table 1/i, $options: "si" } }
+  //           }
+  //         }
+  //       ]
+  //     }, {
+  //       email : email
+  //     }
+  //   ]
+  // });
 
   res.send(login);
 });
