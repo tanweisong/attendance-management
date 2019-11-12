@@ -20,9 +20,14 @@
         <b-button
           variant="outline-primary"
           @click="updateTables"
-          class="guestsListSaveBtn"
+          class="guestsListSaveBtn mr-sm-2"
           size="sm"
         >Save Changes</b-button>
+        <b-button
+          variant="outline-primary"
+          class="guestsListSaveBtn"
+          size="sm"
+        >Download all QR Codes</b-button>
       </b-form>
     </header>
     <b-card-group columns>
@@ -55,19 +60,15 @@
               />
             </template>
             <template v-slot:cell(checkin)="row">
-              <b-button
-                id="tooltip-button-variant"
-                variant="outline-info"
-                disabled
-                size="sm"
-                v-show="(!isNullOrEmpty(row.item.checkedin))"
-              >
-                <font-awesome-icon icon="check" />
-              </b-button>
-              <b-tooltip
-                target="tooltip-button-variant"
+              <b-form-checkbox
+                :id="`checkin-${table._id}-${row.index}`"
+                size="lg"
+                :disabled="(isNullOrEmpty(row.item.name) || isNullOrEmpty(row.item._id))"
+              ></b-form-checkbox>
+              <!-- <b-tooltip
+                :target="`checkin-${table._id}-${row.index}`"
                 variant="dark"
-              >{{ row.item.name }} has checked in</b-tooltip>
+              >{{ row.item.name }} has checked in</b-tooltip>-->
             </template>
             <template v-slot:cell(name)="row">
               <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)"></b-form-input>
@@ -183,7 +184,6 @@
       </b-card>
     </b-card-group>
     <b-modal
-      hide-footer
       ref="tableConfiguration"
       centered
       :title="'QR Code for ' + guest.name"
@@ -192,8 +192,11 @@
     >
       <div class="qrcodeContainer">
         <canvas id="qrcodeContainer"></canvas>
+        <a href="#" id="qrcodelink" :download="`${guest.name}-qrcode.png`" />
       </div>
-      <template v-slot:modal-footer></template>
+      <template v-slot:modal-footer>
+        <b-button size="sm" variant="outline-primary" @click="downloadQR">Download</b-button>
+      </template>
     </b-modal>
     <b-modal ref="guestConfiguration" centered title="Update Guest" size="md">
       <b-form>
@@ -258,7 +261,6 @@ export default {
   },
   data() {
     return {
-      mode: "edit",
       guest: {},
       searchVal: "",
       paxChangeDebounce: null,
@@ -295,35 +297,21 @@ export default {
     },
     fields() {
       const self = this;
-
-      if (self.mode === "edit")
-        return [
-          "name",
-          "contact",
-          "adult",
-          "child",
-          "pax",
-          {
-            key: "action",
-            label: ""
-          }
-        ];
-      else
-        return [
-          {
-            key: "checkin",
-            label: ""
-          },
-          "name",
-          "contact",
-          "adult",
-          "child",
-          "pax",
-          {
-            key: "action",
-            label: ""
-          }
-        ];
+      return [
+        {
+          key: "checkin",
+          label: ""
+        },
+        "name",
+        "contact",
+        "adult",
+        "child",
+        "pax",
+        {
+          key: "action",
+          label: ""
+        }
+      ];
     },
     reduceFields() {
       const self = this;
@@ -457,6 +445,11 @@ export default {
           // An error occurred
         });
     },
+    downloadQR() {
+      const self = this;
+
+      document.getElementById("qrcodelink").click();
+    },
     editGuest(table, guest, index) {
       const self = this;
 
@@ -468,7 +461,9 @@ export default {
     },
     filterTables() {
       const self = this;
-      const searchVal = self.searchVal;
+      let searchVal = self.searchVal;
+      searchVal = _.trim(searchVal);
+
       const aTables = self.$store.getters.getTables;
       const searchValRegex = new RegExp(searchVal, "i");
 
@@ -563,7 +558,9 @@ export default {
         QRCode.toDataURL(
           container,
           document.location.origin + "/register/" + guestId
-        ).then(response => {});
+        ).then(response => {
+          document.getElementById("qrcodelink").href = response;
+        });
     },
     searchTables(e) {
       const self = this;
