@@ -510,7 +510,7 @@ export default {
         _.set(guest, "pax", pax);
 
         self.addNewGuest(table);
-      }, 500);
+      }, 200);
 
       self.paxChangeDebounce();
     },

@@ -2,7 +2,7 @@
   <div class="main">
     <b-navbar type="dark" variant="info">
       <b-navbar-brand href="#">Attendance Management</b-navbar-brand>
-      <b-navbar-nav small v-if="(window.width >= 768)">
+      <b-navbar-nav v-if="(window.width >= 768)">
         <b-nav-item :to="{path : '/home/layout'}">Layout</b-nav-item>
         <b-nav-item :to="{path: '/home/guest-list'}">Guests List</b-nav-item>
         <b-nav-item :to="{path: '/home/settings'}">Settings</b-nav-item>

@@ -245,10 +245,10 @@ export default new Vuex.Store({
       _.set(state, "login", payload);
     },
     setNumOfCols(state, payload) {
-      state.login = { ...state.login, numOfCols: payload };
+      _.set(state, "numOfCols", payload);
     },
     setNumOfRows(state, payload) {
-      state.login = { ...state.login, numOfRows: payload };
+      _.set(state, "numOfRows", payload);
     },
     setNumOfTables(state, payload) {
       state.login = { ...state.login, numOfTables: payload };
