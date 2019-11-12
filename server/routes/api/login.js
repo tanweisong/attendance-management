@@ -1,5 +1,6 @@
 const express = require("express");
 const mongodb = require("mongodb");
+const _ = require("lodash");
 
 const router = express.Router();
 
@@ -63,14 +64,15 @@ router.put("/", async (req, res) => {
     if (sKey !== "email") oParams[sKey] = req.body[sKey];
   }
 
-  await logins.updateOne(
-    {
-      email: req.body.email
-    },
-    {
-      $set: oParams
-    }
-  );
+  if (!_.isEmpty(oParams))
+    await logins.updateOne(
+      {
+        email: req.body.email
+      },
+      {
+        $set: oParams
+      }
+    );
 
   const login = await logins
     .aggregate([
@@ -97,6 +99,7 @@ router.put("/", async (req, res) => {
       }
     ])
     .toArray();
+
   res.send(login);
 });
 

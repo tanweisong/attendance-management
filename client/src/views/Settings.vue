@@ -1,5 +1,6 @@
 <template>
   <div class="content">
+    <b-alert v-if="(!isNullOrEmpty(numOfTables))" variant="success" show>You are all set to go!</b-alert>
     <b-form>
       <div class="form-row">
         <b-form-group label="Num. of table(s)" class="col-md-3 col-lg-3 col-xl-2" label-size="sm">
@@ -73,13 +74,15 @@ export default {
       if (!self.isNullOrEmpty(sMinPaxPerTable) && !isNaN(sMinPaxPerTable))
         sMinPaxPerTable = parseFloat(sMinPaxPerTable);
 
-      const login = await LoginService.updateConfiguration({
+      let login = await LoginService.updateConfiguration({
         minPaxPerTable: sMinPaxPerTable,
         numOfTables: sNumOfTables,
         email: self.email
       });
 
-      self.$root.setLogin(login);
+      if (_.isArray(login)) login = login[0];
+
+      self.$store.dispatch("setLogin", login);
 
       self.$store.dispatch("setShowLoader", false);
     }

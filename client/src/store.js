@@ -25,6 +25,9 @@ export default new Vuex.Store({
     addTableConfigurationRow(context, payload) {
       context.commit("addTableConfigurationRow", payload);
     },
+    clearState(context, payload) {
+      context.commit("clearState", payload);
+    },
     isNull(context, oValue) {
       if (oValue === null || typeof oValue === "undefined") return true;
       else return false;
@@ -76,6 +79,8 @@ export default new Vuex.Store({
             if (!tableConfigurationsIsEmpty)
               payload.tableConfigurations[iRow][iCol] = _.cloneDeep(oTable);
           }
+
+          _.set(oTable, "visible", true);
         }
       }
 
@@ -211,54 +216,57 @@ export default new Vuex.Store({
       let entrances = _.get(state, "login.entrances");
       if (_.indexOf(entrances, payload) < 0) {
         entrances.push(payload);
-        _.set(state, "login.entrances", entrances);
+        state.login = { ...state.login, entrances: entrances };
       }
     },
     addScreen(state, payload) {
       let screens = _.get(state, "login.screens");
       if (_.indexOf(screens, payload) < 0) {
         screens.push(payload);
-        _.set(state, "login.screens", screens);
+        state.login = { ...state.login, screens: screens };
       }
     },
     addTableConfigurationRow(state, payload) {
       let tableConfigurations = _.get(state, "login.tableConfigurations");
 
       tableConfigurations.push(payload);
-      _.set(state, "login.tableConfigurations", tableConfigurations);
+      state.login = {
+        ...state.login,
+        tableConfigurations: tableConfigurations
+      };
     },
     clearState(state) {
       state = {};
     },
     setEntrances(state, payload) {
-      _.set(state, "login.entrances", payload);
+      state.login = { ...state.login, entrances: payload };
     },
     setLogin(state, payload) {
       _.set(state, "login", payload);
     },
     setNumOfCols(state, payload) {
-      _.set(state, "numOfCols", payload);
+      state.login = { ...state.login, numOfCols: payload };
     },
     setNumOfRows(state, payload) {
-      _.set(state, "numOfRows", payload);
+      state.login = { ...state.login, numOfRows: payload };
     },
     setNumOfTables(state, payload) {
-      _.set(state, "login.numOfTables", payload);
+      state.login = { ...state.login, numOfTables: payload };
     },
     setMinPaxPerTable(state, payload) {
-      _.set(state, "login.minPaxPerTable", payload);
+      state.login = { ...state.login, minPaxPerTable: payload };
     },
     setScreens(state, payload) {
-      _.set(state, "login.screens", []);
+      state.login = { ...state.login, screens: [] };
     },
     setShowLoader(state, payload) {
       _.set(state, "showLoader", payload);
     },
     setTableConfigurations(state, payload) {
-      _.set(state, "login.tableConfigurations", payload);
+      state.login = { ...state.login, tableConfigurations: payload };
     },
     setTables(state, payload) {
-      _.set(state, "login.tables", payload);
+      state.login = { ...state.login, tables: payload };
     }
   }
 });

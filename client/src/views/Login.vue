@@ -1,38 +1,42 @@
 <template>
   <div class="main">
     <div class="content">
-      <div class="container">
-        <div class="login">
-          <p>Attendance Management</p>
-          <b-form>
-            <b-form-group label="Username" label-for="username" label-size="sm">
-              <b-form-input
-                id="username"
-                autocomplete="new-password"
-                size="sm"
-                v-model="username"
-                placeholder="Enter username"
-                autofocus
-                @keyup.enter="login"
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group label="Password" label-for="password" label-size="sm">
-              <b-form-input
-                type="password"
-                id="password"
-                size="sm"
-                autocomplete="new-password"
-                v-model="password"
-                placeholder="Enter password"
-                @keyup.enter="login"
-              ></b-form-input>
-            </b-form-group>
-            <b-alert show variant="danger" class="small" v-show="error">{{ errorMessage }}</b-alert>
-            <div class="buttons">
-              <b-button @click="register" class="mx-1 btn-sm" variant="outline-secondary">Register</b-button>
-              <b-button @click="login" class="btn-sm" variant="outline-primary">Login</b-button>
-            </div>
-          </b-form>
+      <b-navbar type="dark" variant="info">
+        <b-navbar-brand href="#">Attendance Management</b-navbar-brand>
+      </b-navbar>
+      <div class="myContainer">
+        <div class="inner">
+          <div class="login">
+            <b-form>
+              <b-form-group label="Username" label-for="username" label-size="sm">
+                <b-form-input
+                  id="username"
+                  autocomplete="new-password"
+                  size="sm"
+                  v-model="username"
+                  placeholder="Enter username"
+                  autofocus
+                  @keyup.enter="login"
+                ></b-form-input>
+              </b-form-group>
+              <b-form-group label="Password" label-for="password" label-size="sm">
+                <b-form-input
+                  type="password"
+                  id="password"
+                  size="sm"
+                  autocomplete="new-password"
+                  v-model="password"
+                  placeholder="Enter password"
+                  @keyup.enter="login"
+                ></b-form-input>
+              </b-form-group>
+              <b-alert show variant="danger" class="small" v-show="error">{{ errorMessage }}</b-alert>
+              <div class="buttons">
+                <b-button @click="register" class="mx-1 btn-sm" variant="outline-secondary">Register</b-button>
+                <b-button @click="login" class="btn-sm" variant="outline-primary">Login</b-button>
+              </div>
+            </b-form>
+          </div>
         </div>
       </div>
     </div>
@@ -72,9 +76,22 @@ export default {
       self.$store.dispatch("setShowLoader", false);
 
       if (!self.isNullOrEmpty(email)) {
-        self.$router.push({
-          path: "/home/layout"
-        });
+        const numOfTables = self.$store.getters.getNumOfTables;
+
+        if (self.isNullOrEmpty(numOfTables))
+          self.$router.push({
+            path: "/home/settings"
+          });
+        else {
+          if (window.innerWidth >= 768)
+            self.$router.push({
+              path: "/home/layout"
+            });
+          else
+            self.$router.push({
+              path: "/home/guest-list"
+            });
+        }
       } else {
         self.open = false;
         self.error = true;
@@ -118,16 +135,36 @@ export default {
   left: 0;
   & > .content {
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
     height: 100%;
-    & > .container {
+    & > .myContainer {
+      padding: 0 0.5rem;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      width: 100%;
-      & > .login {
-        width: 400px;
+      height: 100%;
+      & > .inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        & > .login {
+          width: 400px;
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .main {
+    & > .content {
+      & > .myContainer {
+        & > .inner {
+          & > .login {
+            width: 100%;
+          }
+        }
       }
     }
   }

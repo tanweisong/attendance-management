@@ -30,4 +30,7 @@ export default {
 input[type="number"] {
   text-align: end;
 }
+.removeButtonBorder {
+  border: none !important;
+}
 </style>

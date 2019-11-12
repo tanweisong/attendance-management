@@ -3,20 +3,26 @@
     <header>
       <b-form inline class="mb-4">
         <label class="mr-sm-2" for="search" label-size="sm">Search:</label>
-        <b-form-input
-          type="search"
-          id="search"
-          class="mr-sm-2 col-sm-6 col-md-3"
-          placeholder="search by table or guest name"
-          @blur="searchTables"
-          @keypress.enter="searchTables"
-          v-model="searchVal"
+        <b-input-group class="mb-xs-3">
+          <b-form-input
+            id="search"
+            placeholder="search by table or guest name"
+            @keypress.enter="searchTables"
+            v-model="searchVal"
+            size="sm"
+          ></b-form-input>
+          <b-input-group-append>
+            <b-button variant="outline-secondary" class="mr-sm-2" size="sm" @click="searchTables">
+              <font-awesome-icon icon="search" />
+            </b-button>
+          </b-input-group-append>
+        </b-input-group>
+        <b-button
+          variant="outline-primary"
+          @click="updateTables"
+          class="guestsListSaveBtn"
           size="sm"
-        ></b-form-input>
-        <b-button variant="outline-secondary" class="mr-sm-2" size="sm">
-          <font-awesome-icon icon="search" />
-        </b-button>
-        <b-button variant="outline-primary" @click="updateTables" size="sm">Save Changes</b-button>
+        >Save Changes</b-button>
       </b-form>
     </header>
     <b-card-group columns>
@@ -24,15 +30,23 @@
         :border-variant="(checkTableOverCapacity(table)) ? 'danger' : 'info'"
         v-for="table in tables"
         :key="table._id"
-        class="mb-5 p-2"
         style="padding-top:0.5rem; padding-bottom:0.5rem;"
         no-body
+        :class="(table.visible) ? tableCardShow: tableCardHidden"
       >
         <b-form>
           <b-form-group label="Name" label-size="sm">
             <b-form-input size="sm" v-model="table.name"></b-form-input>
           </b-form-group>
-          <b-table :items="table.guests" small :fields="fields" thead-class="small">
+          <b-table
+            :items="table.guests"
+            small
+            :fields="fields"
+            thead-class="small"
+            v-if="(window.width >= 768)"
+            ref="guestsTable"
+            id="guestsTable"
+          >
             <template v-slot:table-colgroup="scope">
               <col
                 v-for="field in scope.fields"
@@ -68,7 +82,7 @@
                 size="sm"
                 number
                 min="0"
-                @change="onPaxChange(table, row.item)"
+                @change="paxChange(table, row.item, true)"
               ></b-form-input>
             </template>
             <template v-slot:cell(child)="row">
@@ -78,7 +92,7 @@
                 size="sm"
                 number
                 min="0"
-                @change="onPaxChange(table, row.item)"
+                @change="paxChange(table, row.item,true)"
               ></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
@@ -104,6 +118,67 @@
               </b-button>
             </template>
           </b-table>
+          <b-table
+            :items="table.guests"
+            ref="reduceGuestsTable"
+            id="reduceGuestsTable"
+            small
+            :fields="reduceFields"
+            thead-class="small"
+            v-else
+          >
+            <template v-slot:table-colgroup="scope">
+              <col
+                v-for="field in scope.fields"
+                :key="field.key"
+                :style="{ width: (field.key === 'action') ? '40px' : (_.indexOf(['pax'], field.key) > -1) ? '75px' :  (field.key === 'checkin') ? '40px' : (window.width - 40 - 75 - 40) + 'px' }"
+              />
+            </template>
+            <template v-slot:cell(checkin)="row">
+              <b-button
+                id="tooltip-button-variant"
+                variant="outline-info"
+                disabled
+                size="sm"
+                v-show="(!isNullOrEmpty(row.item.checkedin))"
+              >
+                <font-awesome-icon icon="check" />
+              </b-button>
+              <b-tooltip
+                target="tooltip-button-variant"
+                variant="dark"
+              >{{ row.item.name }} has checked in</b-tooltip>
+            </template>
+            <template v-slot:cell(name)="row">
+              <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)" disabled></b-form-input>
+            </template>
+            <template v-slot:cell(contact)="row">
+              <b-form-input v-model="row.item.contact" size="sm"></b-form-input>
+            </template>
+            <template v-slot:cell(pax)="row">
+              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
+            </template>
+            <template v-slot:cell(action)="row">
+              <b-button
+                :id="`guestActions-${table._id}-${row.index}`"
+                variant="outline-primary"
+                size="sm"
+              >
+                <font-awesome-icon icon="ellipsis-h"></font-awesome-icon>
+              </b-button>
+              <b-popover
+                :target="`guestActions-${table._id}-${row.index}`"
+                triggers="focus"
+                placement="auto"
+              >
+                <b-list-group flush>
+                  <b-list-group-item @click="editGuest(table, row.item, row.index)">Edit Guest</b-list-group-item>
+                  <b-list-group-item @click="generateQRCode(row.item, row.index)">View QR Code</b-list-group-item>
+                  <b-list-group-item @click="deleteGuest(table, row.item, row.index)">Delete Guest</b-list-group-item>
+                </b-list-group>
+              </b-popover>
+            </template>
+          </b-table>
         </b-form>
       </b-card>
     </b-card-group>
@@ -120,6 +195,42 @@
       </div>
       <template v-slot:modal-footer></template>
     </b-modal>
+    <b-modal ref="guestConfiguration" centered title="Update Guest" size="md">
+      <b-form>
+        <b-form-group label="Name:" label-for="guest-name">
+          <b-form-input id="guest-name" v-model="guest.name" placeholder="Enter name"></b-form-input>
+        </b-form-group>
+        <b-form-group label="Contact:" label-for="guest-contact">
+          <b-form-input id="guest" v-model="guest.contact" placeholder="Enter contact"></b-form-input>
+        </b-form-group>
+        <b-form-group label="Adult:" label-for="guest-adult">
+          <b-form-input
+            type="number"
+            id="guest-adult"
+            v-model="guest.adult"
+            number
+            min="0"
+            @change="guestPaxChange"
+          ></b-form-input>
+        </b-form-group>
+        <b-form-group label="Child:" label-for="guest-child">
+          <b-form-input
+            type="number"
+            id="guest-child"
+            v-model="guest.child"
+            number
+            min="0"
+            @change="guestPaxChange"
+          ></b-form-input>
+        </b-form-group>
+        <b-form-group label="Pax:" label-for="guest-pax">
+          <b-form-input type="number" id="guest-pax" v-model="guest.pax" disabled number></b-form-input>
+        </b-form-group>
+      </b-form>
+      <template v-slot:modal-footer>
+        <b-button size="sm" variant="outline-primary" @click="updateGuest">Update</b-button>
+      </template>
+    </b-modal>
     <loader></loader>
   </div>
 </template>
@@ -131,9 +242,14 @@ import Loader from "../components/Loader";
 import LoginService from "../services/LoginService";
 import TableService from "../services/TableService";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faSearch, faCheck, faQrcode } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSearch,
+  faCheck,
+  faQrcode,
+  faEllipsisH
+} from "@fortawesome/free-solid-svg-icons";
 
-library.add(faSearch, faCheck, faQrcode);
+library.add(faSearch, faCheck, faQrcode, faEllipsisH);
 
 export default {
   mixins: [app],
@@ -145,8 +261,26 @@ export default {
       mode: "edit",
       guest: {},
       searchVal: "",
-      paxChangeDebounce: null
+      paxChangeDebounce: null,
+      tableCardHidden: "tableCardHidden mb-5 p-2",
+      tableCardShow: "tableCardShow mb-5 p-2",
+      window: {
+        width: 0,
+        height: 0
+      }
     };
+  },
+  created() {
+    window.addEventListener("resize", this.handleResize);
+    this.handleResize();
+  },
+  mounted() {
+    const self = this;
+
+    self.updateGuestList();
+  },
+  destroyed() {
+    window.removeEventListener("resize", this.handleResize);
   },
   computed: {
     numOfTables() {
@@ -190,6 +324,18 @@ export default {
             label: ""
           }
         ];
+    },
+    reduceFields() {
+      const self = this;
+
+      return [
+        "name",
+        "pax",
+        {
+          key: "action",
+          label: ""
+        }
+      ];
     },
     email() {
       const self = this;
@@ -262,7 +408,22 @@ export default {
 
         if (parseFloat(minPaxPerTable) < iTotalGuests) return true;
         else return false;
-      } else return "false";
+      } else {
+        if (self.isNullOrEmpty(minPaxPerTable)) return false;
+      }
+    },
+    async createTables() {
+      const self = this;
+      var login = await TableService.createTables({
+        email: self.email,
+        tables: self.tables
+      });
+
+      if (_.isArray(login)) login = login[0];
+
+      await self.$store.dispatch("setLogin", login);
+
+      self.updateGuestList();
     },
     deleteGuest(table, item, index) {
       const sGuestName = _.get(item, "name");
@@ -296,7 +457,74 @@ export default {
           // An error occurred
         });
     },
-    onPaxChange(table, guest) {
+    editGuest(table, guest, index) {
+      const self = this;
+
+      self.guest = _.cloneDeep(guest);
+      self.$set(self.guest, "index", index);
+      self.$set(self.guest, "table", table);
+
+      self.$refs["guestConfiguration"].show();
+    },
+    filterTables() {
+      const self = this;
+      const searchVal = self.searchVal;
+      const aTables = self.$store.getters.getTables;
+      const searchValRegex = new RegExp(searchVal, "i");
+
+      if (!_.isEmpty(aTables)) {
+        for (var iTableIndex = 0; iTableIndex < aTables.length; iTableIndex++) {
+          const oTable = aTables[iTableIndex];
+          const sTableName = _.get(oTable, "name");
+          const aGuests = _.get(oTable, "guests");
+
+          let bTableMatched = !_.isEmpty(_.words(sTableName, searchValRegex));
+
+          if (!bTableMatched) {
+            if (!_.isEmpty(aGuests)) {
+              for (
+                var iGuestIndex = 0;
+                iGuestIndex < aGuests.length;
+                iGuestIndex++
+              ) {
+                const oGuest = aGuests[iGuestIndex];
+                const sGuestName = _.get(oGuest, "name");
+
+                let bGuestMatched = !_.isEmpty(
+                  _.words(sGuestName, searchValRegex)
+                );
+
+                if (bGuestMatched) {
+                  bTableMatched = true;
+                  break;
+                }
+              }
+            }
+          }
+
+          _.set(oTable, "visible", bTableMatched);
+        }
+      }
+    },
+    generateQRCode(guest, index) {
+      const self = this;
+
+      self.guest = _.cloneDeep(guest);
+
+      self.$refs["tableConfiguration"].show();
+    },
+    guestPaxChange() {
+      const self = this;
+      const guest = self.guest;
+      const table = _.get(guest, "table");
+
+      self.paxChange(table, guest, false);
+    },
+    handleResize() {
+      this.window.width = window.innerWidth;
+      this.window.height = window.innerHeight;
+    },
+    paxChange(table, guest, bUpdateTableGuest) {
       const self = this;
 
       if (!self.isNull(self.paxChangeDebounce)) {
@@ -320,8 +548,8 @@ export default {
 
         _.set(guest, "pax", pax);
 
-        self.addNewGuest(table);
-      }, 500);
+        if (bUpdateTableGuest) self.addNewGuest(table);
+      }, 200);
 
       self.paxChangeDebounce();
     },
@@ -337,29 +565,46 @@ export default {
           document.location.origin + "/register/" + guestId
         ).then(response => {});
     },
-    generateQRCode(guest, index) {
+    searchTables(e) {
       const self = this;
 
-      self.guest = _.cloneDeep(guest);
+      e.preventDefault();
 
-      self.$refs["tableConfiguration"].show();
+      self.filterTables();
     },
-    searchTables() {
+    updateGuest() {
       const self = this;
-      const searchVal = self.searchVal;
-    },
-    async createTables() {
-      const self = this;
-      var login = await TableService.createTables({
-        email: self.email,
-        tables: self.tables
-      });
+      const guest = self.guest;
+      const table = _.get(guest, "table");
+      const tableId = _.get(table, "_id");
+      const index = _.get(guest, "index");
+      let tables = self.$store.getters.getTables;
 
-      if (_.isArray(login)) login = login[0];
+      if (!_.isEmpty(tables)) {
+        for (var iTableIndex = 0; iTableIndex < tables.length; iTableIndex++) {
+          const oTable = tables[iTableIndex];
+          const sTableId = _.get(oTable, "_id");
 
-      await self.$store.dispatch("setLogin", login);
+          if (sTableId === tableId) {
+            let guestClone = _.cloneDeep(guest);
+            _.unset(guestClone, "table");
+            _.unset(guestClone, "index");
 
-      self.updateGuestList();
+            _.set(oTable, ["guests", index], guestClone);
+
+            self.$store.dispatch("setTables", tables);
+            self.updateGuestList();
+            self.$refs["guestConfiguration"].hide();
+
+            if (self.window.width >= 768) {
+              this.$root.$emit("bv::refresh::table", "guestsTable");
+            } else {
+              this.$root.$emit("bv::refresh::table", "reduceGuestsTable");
+            }
+            break;
+          }
+        }
+      }
     },
     updateGuestList() {
       const self = this;
@@ -433,12 +678,9 @@ export default {
       this.$bvToast.toast("Changes saved successfully", {
         autoHideDelay: 5000
       });
-    }
-  },
-  mounted() {
-    const self = this;
 
-    self.updateGuestList();
+      self.filterTables();
+    }
   }
 };
 </script>
@@ -449,6 +691,12 @@ export default {
 }
 .guest-card {
   margin: 0;
+}
+.tableCardHidden {
+  display: none;
+}
+.tableCardShow {
+  display: inline-block;
 }
 .qrcodeContainer {
   display: flex;
@@ -470,6 +718,11 @@ export default {
     -webkit-column-count: 3;
     -moz-column-count: 3;
     column-count: 3;
+  }
+}
+@media screen and (max-width: 414px) {
+  .guestsListSaveBtn {
+    margin-top: 0.5rem;
   }
 }
 </style>

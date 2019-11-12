@@ -1,5 +1,6 @@
 const express = require("express");
 const mongodb = require("mongodb");
+const _ = require("lodash");
 
 const router = express.Router();
 
@@ -70,19 +71,22 @@ router.post("/search", async (req, res) => {
     .aggregate([{ $match: { email: sLoginEmail } }])
     .toArray();
 
+  const searchValRegex = new RegExp(/^ + searchVale + /i);
+
   // db.tables.find({
   //   $and: [
   //     {
   //       $or: [
-  //         { name: { $regex: /^Table 1/i, $options: "si" } },
+  //         { name: { $regex: searchValRegex, $options: "si" } },
   //         {
   //           guests: {
-  //             $elemMatch: { name: { $regex: /^Table 1/i, $options: "si" } }
+  //             $elemMatch: { name: { $regex: searchValRegex, $options: "si" } }
   //           }
   //         }
   //       ]
-  //     }, {
-  //       email : email
+  //     },
+  //     {
+  //       email: email
   //     }
   //   ]
   // });
