@@ -29,6 +29,10 @@ export default new VueRouter({
           component: () => import("@/views/Layout")
         },
         {
+          path: "qrcode",
+          component: () => import("@/views/QRCode")
+        },
+        {
           path: "guest-list",
           component: () => import("@/views/GuestsList")
         },

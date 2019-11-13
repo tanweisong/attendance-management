@@ -16,14 +16,19 @@
                   v-model="form.email"
                   placeholder="Enter email"
                   @blur="validate('email')"
-                  :state="(this.isNull(state.email) ? null : false)"
+                  :state="this.isNull(state.email) ? null : false"
                   size="sm"
                 ></b-form-input>
                 <b-form-invalid-feedback
-                  :state="(this.isNull(state.email) ? null : false)"
-                >{{ state.email }}</b-form-invalid-feedback>
+                  :state="this.isNull(state.email) ? null : false"
+                  >{{ state.email }}</b-form-invalid-feedback
+                >
               </b-form-group>
-              <b-form-group label="Password" label-for="password" label-size="sm">
+              <b-form-group
+                label="Password"
+                label-for="password"
+                label-size="sm"
+              >
                 <b-form-input
                   type="password"
                   id="password"
@@ -31,15 +36,22 @@
                   v-model="form.password"
                   placeholder="Enter password"
                   @blur="validate('password')"
-                  :state="(this.isNull(state.password) ? null : false)"
-                  v-b-tooltip.hover="'Password must be at least 8 characters long, and contains at least one special character!'"
+                  :state="this.isNull(state.password) ? null : false"
+                  v-b-tooltip.hover="
+                    'Password must be at least 8 characters long, and contains at least one special character!'
+                  "
                   size="sm"
                 ></b-form-input>
                 <b-form-invalid-feedback
-                  :state="(this.isNull(state.password) ? null : false)"
-                >{{ state.password }}</b-form-invalid-feedback>
+                  :state="this.isNull(state.password) ? null : false"
+                  >{{ state.password }}</b-form-invalid-feedback
+                >
               </b-form-group>
-              <b-form-group label="Confirm Password" label-for="confirmPassword" label-size="sm">
+              <b-form-group
+                label="Confirm Password"
+                label-for="confirmPassword"
+                label-size="sm"
+              >
                 <b-form-input
                   type="password"
                   id="confirm-password"
@@ -47,20 +59,27 @@
                   v-model="form.confirmPassword"
                   placeholder="Enter password as above"
                   @blur="validate('confirmPassword')"
-                  :state="(this.isNull(state.confirmPassword) ? null : false)"
+                  :state="this.isNull(state.confirmPassword) ? null : false"
                   size="sm"
                 ></b-form-input>
                 <b-form-invalid-feedback
-                  :state="(this.isNull(state.confirmPassword) ? null : false)"
-                >{{ state.confirmPassword }}</b-form-invalid-feedback>
+                  :state="this.isNull(state.confirmPassword) ? null : false"
+                  >{{ state.confirmPassword }}</b-form-invalid-feedback
+                >
               </b-form-group>
               <div class="buttons">
-                <b-button @click="cancel" class="mx-1 btn-sm" variant="outline-secondary">Cancel</b-button>
+                <b-button
+                  @click="cancel"
+                  class="mx-1 btn-sm"
+                  variant="outline-secondary"
+                  >Cancel</b-button
+                >
                 <b-button
                   @click="register('form')"
                   class="btn-sm"
                   variant="outline-primary"
-                >Register</b-button>
+                  >Register</b-button
+                >
               </div>
             </b-form>
           </div>
@@ -265,7 +284,7 @@ export default {
     flex-direction: column;
     height: 100%;
     & > .myContainer {
-      padding: 0 0.5rem;
+      padding: 0 1rem;
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -283,7 +302,7 @@ export default {
   }
 }
 
-@media screen and (max-width: 400px) {
+@media screen and (max-width: 414px) {
   .main {
     & > .content {
       & > .myContainer {

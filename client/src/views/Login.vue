@@ -8,7 +8,11 @@
         <div class="inner">
           <div class="login">
             <b-form>
-              <b-form-group label="Username" label-for="username" label-size="sm">
+              <b-form-group
+                label="Username"
+                label-for="username"
+                label-size="sm"
+              >
                 <b-form-input
                   id="username"
                   autocomplete="new-password"
@@ -19,7 +23,11 @@
                   @keyup.enter="login"
                 ></b-form-input>
               </b-form-group>
-              <b-form-group label="Password" label-for="password" label-size="sm">
+              <b-form-group
+                label="Password"
+                label-for="password"
+                label-size="sm"
+              >
                 <b-form-input
                   type="password"
                   id="password"
@@ -30,10 +38,22 @@
                   @keyup.enter="login"
                 ></b-form-input>
               </b-form-group>
-              <b-alert show variant="danger" class="small" v-show="error">{{ errorMessage }}</b-alert>
+              <b-alert show variant="danger" class="small" v-show="error">{{
+                errorMessage
+              }}</b-alert>
               <div class="buttons">
-                <b-button @click="register" class="mx-1 btn-sm" variant="outline-secondary">Register</b-button>
-                <b-button @click="login" class="btn-sm" variant="outline-primary">Login</b-button>
+                <b-button
+                  @click="register"
+                  class="mx-1 btn-sm"
+                  variant="outline-secondary"
+                  >Register</b-button
+                >
+                <b-button
+                  @click="login"
+                  class="btn-sm"
+                  variant="outline-primary"
+                  >Login</b-button
+                >
               </div>
             </b-form>
           </div>
@@ -138,7 +158,7 @@ export default {
     flex-direction: column;
     height: 100%;
     & > .myContainer {
-      padding: 0 0.5rem;
+      padding: 0 1rem;
       display: flex;
       flex-direction: row;
       align-items: center;
@@ -156,7 +176,7 @@ export default {
   }
 }
 
-@media screen and (max-width: 400px) {
+@media screen and (max-width: 415px) {
   .main {
     & > .content {
       & > .myContainer {

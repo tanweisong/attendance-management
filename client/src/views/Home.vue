@@ -2,21 +2,26 @@
   <div class="main">
     <b-navbar type="dark" variant="info">
       <b-navbar-brand href="#">Attendance Management</b-navbar-brand>
-      <b-navbar-nav v-if="(window.width >= 768)">
-        <b-nav-item :to="{path : '/home/layout'}">Layout</b-nav-item>
-        <b-nav-item :to="{path: '/home/guest-list'}">Guests List</b-nav-item>
-        <b-nav-item :to="{path: '/home/settings'}">Settings</b-nav-item>
+      <b-navbar-nav v-if="window.width >= 768">
+        <b-nav-item :to="{ path: '/home/layout' }">Layout</b-nav-item>
+        <b-nav-item :to="{ path: '/home/guest-list' }">Guests List</b-nav-item>
+        <b-nav-item :to="{ path: '/home/settings' }">Settings</b-nav-item>
       </b-navbar-nav>
       <b-navbar-nav class="ml-auto">
         <b-button
           variant="outline-dark"
           @click="logout"
-          v-if="(window.width >= 768)"
+          v-if="window.width >= 768"
           class="removeButtonBorder"
         >
           <font-awesome-icon icon="sign-out-alt" />
         </b-button>
-        <b-button id="showActions" variant="outline-dark" v-else class="removeButtonBorder">
+        <b-button
+          id="showActions"
+          variant="outline-dark"
+          v-else
+          class="removeButtonBorder"
+        >
           <font-awesome-icon icon="ellipsis-h" />
         </b-button>
       </b-navbar-nav>
@@ -28,8 +33,15 @@
       :show.sync="showActionsVisible"
     >
       <b-list-group flush>
-        <b-list-group-item @click="route('/home/guest-list')">Guests List</b-list-group-item>
-        <b-list-group-item @click="route('/home/settings')">Settings</b-list-group-item>
+        <b-list-group-item @click="route('/home/qrcode')"
+          >Scan QR Code</b-list-group-item
+        >
+        <b-list-group-item @click="route('/home/guest-list')"
+          >Guests List</b-list-group-item
+        >
+        <b-list-group-item @click="route('/home/settings')"
+          >Settings</b-list-group-item
+        >
         <b-list-group-item @click="logout">Logout</b-list-group-item>
       </b-list-group>
     </b-popover>
@@ -100,6 +112,8 @@ export default {
 <style lang="scss" scoped>
 .main {
   position: absolute;
+  display: flex;
+  flex-direction: column;
   top: 0;
   bottom: 0;
   left: 0;
