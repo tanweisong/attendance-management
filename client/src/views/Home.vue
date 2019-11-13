@@ -1,5 +1,5 @@
 <template>
-  <div class="main">
+  <div class="main d-flex flex-column position-absolute">
     <b-navbar type="dark" variant="info">
       <b-navbar-brand href="#">Attendance Management</b-navbar-brand>
       <b-navbar-nav v-if="window.width >= 768">
@@ -16,12 +16,7 @@
         >
           <font-awesome-icon icon="sign-out-alt" />
         </b-button>
-        <b-button
-          id="showActions"
-          variant="outline-dark"
-          v-else
-          class="removeButtonBorder"
-        >
+        <b-button id="showActions" variant="outline-dark" v-else class="removeButtonBorder">
           <font-awesome-icon icon="ellipsis-h" />
         </b-button>
       </b-navbar-nav>
@@ -33,15 +28,9 @@
       :show.sync="showActionsVisible"
     >
       <b-list-group flush>
-        <b-list-group-item @click="route('/home/qrcode')"
-          >Scan QR Code</b-list-group-item
-        >
-        <b-list-group-item @click="route('/home/guest-list')"
-          >Guests List</b-list-group-item
-        >
-        <b-list-group-item @click="route('/home/settings')"
-          >Settings</b-list-group-item
-        >
+        <b-list-group-item @click="route('/home/qrcode')">QR Code Checkin</b-list-group-item>
+        <b-list-group-item @click="route('/home/guest-list')">Guests List</b-list-group-item>
+        <b-list-group-item @click="route('/home/settings')">Settings</b-list-group-item>
         <b-list-group-item @click="logout">Logout</b-list-group-item>
       </b-list-group>
     </b-popover>
@@ -111,9 +100,6 @@ export default {
 
 <style lang="scss" scoped>
 .main {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
   top: 0;
   bottom: 0;
   left: 0;

@@ -6,32 +6,29 @@
         <b-input-group class="mb-xs-3">
           <b-form-input
             id="search"
+            type="search"
             placeholder="search by table or guest name"
             @keypress.enter="searchTables"
             v-model="searchVal"
             size="sm"
           ></b-form-input>
           <b-input-group-append>
-            <b-button
-              variant="outline-secondary"
-              class="mr-sm-2"
-              size="sm"
-              @click="searchTables"
-            >
+            <b-button variant="outline-secondary" class="mr-sm-2" size="sm" @click="searchTables">
               <font-awesome-icon icon="search" />
             </b-button>
           </b-input-group-append>
         </b-input-group>
-        <b-button
+        <!-- <b-button
           variant="outline-primary"
           @click="updateTables"
           class="guestsListSaveBtn"
           size="sm"
-          >Save Changes</b-button
-        >
-        <b-button variant="outline-primary" class="guestsListSaveBtn" size="sm"
-          >Download all QR Codes</b-button
-        >
+        >Save Changes</b-button>-->
+        <b-button
+          variant="outline-primary"
+          class="guestsListSaveBtn"
+          size="sm"
+        >Download all QR Codes</b-button>
       </b-form>
     </header>
     <b-card-group columns>
@@ -79,6 +76,7 @@
             <template v-slot:cell(checkin)="row">
               <b-form-checkbox
                 :id="`checkin-${table._id}-${row.index}`"
+                v-model="row.item.checkin"
                 size="lg"
                 :disabled="
                   isNullOrEmpty(row.item.name) || isNullOrEmpty(row.item._id)
@@ -90,11 +88,7 @@
               >{{ row.item.name }} has checked in</b-tooltip>-->
             </template>
             <template v-slot:cell(name)="row">
-              <b-form-input
-                v-model="row.item.name"
-                size="sm"
-                @change="addNewGuest(table)"
-              ></b-form-input>
+              <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)"></b-form-input>
             </template>
             <template v-slot:cell(contact)="row">
               <b-form-input v-model="row.item.contact" size="sm"></b-form-input>
@@ -120,13 +114,7 @@
               ></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
-              <b-form-input
-                type="number"
-                v-model="row.item.pax"
-                disabled
-                size="sm"
-                number
-              ></b-form-input>
+              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
             </template>
             <template v-slot:cell(action)="row">
               <b-button
@@ -173,43 +161,32 @@
                       ? '75px'
                       : field.key === 'checkin'
                       ? '40px'
-                      : window.width - 40 - 75 - 40 + 'px'
+                      : window.width - 40 - 75 - 40 - 40 + 'px'
                 }"
               />
             </template>
             <template v-slot:cell(checkin)="row">
-              <b-button
-                id="tooltip-button-variant"
-                variant="outline-info"
-                disabled
-                size="sm"
-                v-show="!isNullOrEmpty(row.item.checkedin)"
-              >
-                <font-awesome-icon icon="check" />
-              </b-button>
-              <b-tooltip target="tooltip-button-variant" variant="dark"
-                >{{ row.item.name }} has checked in</b-tooltip
-              >
+              <b-form-checkbox
+                :id="`checkin-${table._id}-${row.index}`"
+                size="lg"
+                v-model="row.item.checkin"
+                :disabled="
+                  isNullOrEmpty(row.item.name) || isNullOrEmpty(row.item._id)
+                "
+              ></b-form-checkbox>
+              <!-- <b-tooltip
+                :target="`checkin-${table._id}-${row.index}`"
+                variant="dark"
+              >{{ row.item.name }} has checked in</b-tooltip>-->
             </template>
             <template v-slot:cell(name)="row">
-              <b-form-input
-                v-model="row.item.name"
-                size="sm"
-                @change="addNewGuest(table)"
-                disabled
-              ></b-form-input>
+              <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)" disabled></b-form-input>
             </template>
             <template v-slot:cell(contact)="row">
               <b-form-input v-model="row.item.contact" size="sm"></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
-              <b-form-input
-                type="number"
-                v-model="row.item.pax"
-                disabled
-                size="sm"
-                number
-              ></b-form-input>
+              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
             </template>
             <template v-slot:cell(action)="row">
               <b-button
@@ -225,18 +202,9 @@
                 placement="auto"
               >
                 <b-list-group flush>
-                  <b-list-group-item
-                    @click="editGuest(table, row.item, row.index)"
-                    >Edit Guest</b-list-group-item
-                  >
-                  <b-list-group-item
-                    @click="generateQRCode(row.item, row.index)"
-                    >View QR Code</b-list-group-item
-                  >
-                  <b-list-group-item
-                    @click="deleteGuest(table, row.item, row.index)"
-                    >Delete Guest</b-list-group-item
-                  >
+                  <b-list-group-item @click="editGuest(table, row.item, row.index)">Edit Guest</b-list-group-item>
+                  <b-list-group-item @click="generateQRCode(row.item, row.index)">View QR Code</b-list-group-item>
+                  <b-list-group-item @click="deleteGuest(table, row.item, row.index)">Delete Guest</b-list-group-item>
                 </b-list-group>
               </b-popover>
             </template>
@@ -256,26 +224,16 @@
         <a href="#" id="qrcodelink" :download="`${guest.name}-qrcode.png`" />
       </div>
       <template v-slot:modal-footer>
-        <b-button size="sm" variant="outline-primary" @click="downloadQR"
-          >Download</b-button
-        >
+        <b-button size="sm" variant="outline-primary" @click="downloadQR">Download</b-button>
       </template>
     </b-modal>
     <b-modal ref="guestConfiguration" centered title="Update Guest" size="md">
       <b-form>
         <b-form-group label="Name:" label-for="guest-name">
-          <b-form-input
-            id="guest-name"
-            v-model="guest.name"
-            placeholder="Enter name"
-          ></b-form-input>
+          <b-form-input id="guest-name" v-model="guest.name" placeholder="Enter name"></b-form-input>
         </b-form-group>
         <b-form-group label="Contact:" label-for="guest-contact">
-          <b-form-input
-            id="guest"
-            v-model="guest.contact"
-            placeholder="Enter contact"
-          ></b-form-input>
+          <b-form-input id="guest" v-model="guest.contact" placeholder="Enter contact"></b-form-input>
         </b-form-group>
         <b-form-group label="Adult:" label-for="guest-adult">
           <b-form-input
@@ -298,19 +256,11 @@
           ></b-form-input>
         </b-form-group>
         <b-form-group label="Pax:" label-for="guest-pax">
-          <b-form-input
-            type="number"
-            id="guest-pax"
-            v-model="guest.pax"
-            disabled
-            number
-          ></b-form-input>
+          <b-form-input type="number" id="guest-pax" v-model="guest.pax" disabled number></b-form-input>
         </b-form-group>
       </b-form>
       <template v-slot:modal-footer>
-        <b-button size="sm" variant="outline-primary" @click="updateGuest"
-          >Update</b-button
-        >
+        <b-button size="sm" variant="outline-primary" @click="updateGuest">Update</b-button>
       </template>
     </b-modal>
     <loader></loader>
@@ -357,6 +307,8 @@ export default {
     const self = this;
 
     self.updateGuestList();
+
+    self.filterTables();
   },
   destroyed() {
     window.removeEventListener("resize", this.handleResize);
@@ -394,6 +346,10 @@ export default {
       const self = this;
 
       return [
+        {
+          key: "checkin",
+          label: ""
+        },
         "name",
         "pax",
         {

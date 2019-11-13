@@ -63,37 +63,6 @@ router.post("/", async (req, res) => {
   res.send(login);
 });
 
-router.post("/search", async (req, res) => {
-  const logins = await loadLoginCollection();
-  const email = req.body.email;
-  const searchVal = req.body.searchVal;
-  const login = await logins
-    .aggregate([{ $match: { email: sLoginEmail } }])
-    .toArray();
-
-  const searchValRegex = new RegExp(/^ + searchVale + /i);
-
-  // db.tables.find({
-  //   $and: [
-  //     {
-  //       $or: [
-  //         { name: { $regex: searchValRegex, $options: "si" } },
-  //         {
-  //           guests: {
-  //             $elemMatch: { name: { $regex: searchValRegex, $options: "si" } }
-  //           }
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       email: email
-  //     }
-  //   ]
-  // });
-
-  res.send(login);
-});
-
 router.put("/", async (req, res) => {
   const tables = await loadTableCollection();
 
@@ -147,6 +116,49 @@ router.put("/", async (req, res) => {
       }
     }
   }
+
+  const logins = await loadLoginCollection();
+  const login = await logins
+    .aggregate([
+      { $match: { email: email } },
+      {
+        $lookup: {
+          from: "tables",
+          localField: "email",
+          foreignField: "email",
+          as: "tables"
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          email: 1,
+          numOfTables: 1,
+          minPaxPerTable: 1,
+          tableConfigurations: 1,
+          tables: 1,
+          screens: 1,
+          entrances: 1
+        }
+      }
+    ])
+    .toArray();
+
+  res.send(login);
+});
+
+router.put("/:id", async (req, res) => {
+  const tables = await loadTableCollection();
+  const table = req.body;
+  const email = _.get(table, "email");
+
+  if (!_.isEmpty(table))
+    await tables.updateOne(
+      { _id: new mongodb.ObjectId(req.params.id) },
+      {
+        $set: table
+      }
+    );
 
   const logins = await loadLoginCollection();
   const login = await logins

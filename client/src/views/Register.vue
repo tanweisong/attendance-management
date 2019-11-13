@@ -1,11 +1,11 @@
 <template>
   <div class="main">
-    <div class="content">
+    <div class="content d-flex flex-column">
       <b-navbar type="dark" variant="info">
         <b-navbar-brand href="#">Attendance Management</b-navbar-brand>
       </b-navbar>
-      <div class="myContainer">
-        <div class="inner">
+      <div class="myContainer d-flex flex-row align-items-center">
+        <div class="inner d-flex flex-column align-items-center">
           <div class="register">
             <p>Create An Account</p>
             <b-form>
@@ -280,19 +280,11 @@ export default {
   bottom: 0;
   left: 0;
   & > .content {
-    display: flex;
-    flex-direction: column;
     height: 100%;
     & > .myContainer {
       padding: 0 1rem;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
       height: 100%;
       & > .inner {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
         width: 100%;
         & > .register {
           width: 400px;

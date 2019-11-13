@@ -1,10 +1,15 @@
 <template>
-  <div class="content">
+  <div class="content d-flex flex-column flex-grow-5">
     <div class="item top control-group">
       <b-form>
         <div class="form-row">
           <div class="md-col-4">
-            <b-form-group label="Num. of row(s)" class="mr-sm-2" label-size="sm" for="numOfRows">
+            <b-form-group
+              label="Num. of row(s)"
+              class="mr-sm-2"
+              label-size="sm"
+              for="numOfRows"
+            >
               <b-form-input
                 id="numOfRows"
                 autocomplete="new-password"
@@ -14,13 +19,18 @@
                 v-model="numOfRows"
                 placeholder="Enter num. of row(s)"
                 @blur="mappingValueChange"
-                :state="(this.isNull(state.numOfRows) ? null : false)"
+                :state="this.isNull(state.numOfRows) ? null : false"
                 number
               ></b-form-input>
             </b-form-group>
           </div>
           <div class="md-col-4">
-            <b-form-group class="mr-sm-2" label-size="sm" label="Num. of col(s)" for="numOfCols">
+            <b-form-group
+              class="mr-sm-2"
+              label-size="sm"
+              label="Num. of col(s)"
+              for="numOfCols"
+            >
               <b-form-input
                 id="numOfCols"
                 type="number"
@@ -30,17 +40,22 @@
                 v-model="numOfCols"
                 placeholder="Enter num. of col(s)"
                 @blur="mappingValueChange"
-                :state="(this.isNull(state.numOfCols) ? null : false)"
+                :state="this.isNull(state.numOfCols) ? null : false"
                 number
               ></b-form-input>
             </b-form-group>
           </div>
         </div>
-        <b-button variant="outline-primary" class="btn-sm" @click="update">Update</b-button>
+        <b-button variant="outline-primary" class="btn-sm" @click="update"
+          >Update</b-button
+        >
       </b-form>
     </div>
     <div class="content">
-      <room-setting :tableConfigurations="tableConfigurations" :numOfCols="numOfCols"></room-setting>
+      <room-setting
+        :tableConfigurations="tableConfigurations"
+        :numOfCols="numOfCols"
+      ></room-setting>
     </div>
     <loader></loader>
   </div>
@@ -282,21 +297,12 @@ export default {
 
 <style lang="scss" scoped>
 .content {
-  display: flex;
-  flex-direction: column;
   height: 100%;
-  & > .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-  & > .header,
   & > .top {
     padding: 0.5rem 1rem;
   }
   & .content {
     padding: 0.5rem 1rem;
-    flex-grow: 5;
   }
 }
 </style>
