@@ -13,7 +13,12 @@
             size="sm"
           ></b-form-input>
           <b-input-group-append>
-            <b-button variant="outline-secondary" class="mr-sm-2" size="sm" @click="searchTables">
+            <b-button
+              variant="outline-secondary"
+              class="mr-sm-2"
+              size="sm"
+              @click="searchTables"
+            >
               <font-awesome-icon icon="search" />
             </b-button>
           </b-input-group-append>
@@ -28,7 +33,9 @@
           variant="outline-primary"
           class="guestsListSaveBtn"
           size="sm"
-        >Download all QR Codes</b-button>
+          @click="generateAndDownloadQRCodes"
+          >Download all QR Codes</b-button
+        >
       </b-form>
     </header>
     <b-card-group columns>
@@ -88,7 +95,11 @@
               >{{ row.item.name }} has checked in</b-tooltip>-->
             </template>
             <template v-slot:cell(name)="row">
-              <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)"></b-form-input>
+              <b-form-input
+                v-model="row.item.name"
+                size="sm"
+                @change="addNewGuest(table)"
+              ></b-form-input>
             </template>
             <template v-slot:cell(contact)="row">
               <b-form-input v-model="row.item.contact" size="sm"></b-form-input>
@@ -114,7 +125,13 @@
               ></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
-              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
+              <b-form-input
+                type="number"
+                v-model="row.item.pax"
+                disabled
+                size="sm"
+                number
+              ></b-form-input>
             </template>
             <template v-slot:cell(action)="row">
               <b-button
@@ -180,13 +197,24 @@
               >{{ row.item.name }} has checked in</b-tooltip>-->
             </template>
             <template v-slot:cell(name)="row">
-              <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)" disabled></b-form-input>
+              <b-form-input
+                v-model="row.item.name"
+                size="sm"
+                @change="addNewGuest(table)"
+                disabled
+              ></b-form-input>
             </template>
             <template v-slot:cell(contact)="row">
               <b-form-input v-model="row.item.contact" size="sm"></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
-              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
+              <b-form-input
+                type="number"
+                v-model="row.item.pax"
+                disabled
+                size="sm"
+                number
+              ></b-form-input>
             </template>
             <template v-slot:cell(action)="row">
               <b-button
@@ -202,9 +230,18 @@
                 placement="auto"
               >
                 <b-list-group flush>
-                  <b-list-group-item @click="editGuest(table, row.item, row.index)">Edit Guest</b-list-group-item>
-                  <b-list-group-item @click="generateQRCode(row.item, row.index)">View QR Code</b-list-group-item>
-                  <b-list-group-item @click="deleteGuest(table, row.item, row.index)">Delete Guest</b-list-group-item>
+                  <b-list-group-item
+                    @click="editGuest(table, row.item, row.index)"
+                    >Edit Guest</b-list-group-item
+                  >
+                  <b-list-group-item
+                    @click="generateQRCode(row.item, row.index)"
+                    >View QR Code</b-list-group-item
+                  >
+                  <b-list-group-item
+                    @click="deleteGuest(table, row.item, row.index)"
+                    >Delete Guest</b-list-group-item
+                  >
                 </b-list-group>
               </b-popover>
             </template>
@@ -224,16 +261,26 @@
         <a href="#" id="qrcodelink" :download="`${guest.name}-qrcode.png`" />
       </div>
       <template v-slot:modal-footer>
-        <b-button size="sm" variant="outline-primary" @click="downloadQR">Download</b-button>
+        <b-button size="sm" variant="outline-primary" @click="downloadQR"
+          >Download</b-button
+        >
       </template>
     </b-modal>
     <b-modal ref="guestConfiguration" centered title="Update Guest" size="md">
       <b-form>
         <b-form-group label="Name:" label-for="guest-name">
-          <b-form-input id="guest-name" v-model="guest.name" placeholder="Enter name"></b-form-input>
+          <b-form-input
+            id="guest-name"
+            v-model="guest.name"
+            placeholder="Enter name"
+          ></b-form-input>
         </b-form-group>
         <b-form-group label="Contact:" label-for="guest-contact">
-          <b-form-input id="guest" v-model="guest.contact" placeholder="Enter contact"></b-form-input>
+          <b-form-input
+            id="guest"
+            v-model="guest.contact"
+            placeholder="Enter contact"
+          ></b-form-input>
         </b-form-group>
         <b-form-group label="Adult:" label-for="guest-adult">
           <b-form-input
@@ -256,11 +303,19 @@
           ></b-form-input>
         </b-form-group>
         <b-form-group label="Pax:" label-for="guest-pax">
-          <b-form-input type="number" id="guest-pax" v-model="guest.pax" disabled number></b-form-input>
+          <b-form-input
+            type="number"
+            id="guest-pax"
+            v-model="guest.pax"
+            disabled
+            number
+          ></b-form-input>
         </b-form-group>
       </b-form>
       <template v-slot:modal-footer>
-        <b-button size="sm" variant="outline-primary" @click="updateGuest">Update</b-button>
+        <b-button size="sm" variant="outline-primary" @click="updateGuest"
+          >Update</b-button
+        >
       </template>
     </b-modal>
     <loader></loader>
@@ -270,6 +325,7 @@
 <script>
 import app from "../functions/app";
 import QRCode from "qrcode";
+import JSZip from "jszip";
 import Loader from "../components/Loader";
 import LoginService from "../services/LoginService";
 import TableService from "../services/TableService";
@@ -532,6 +588,35 @@ export default {
 
           _.set(oTable, "visible", bTableMatched);
         }
+      }
+    },
+    generateAndDownloadQRCodes() {
+      const self = this;
+      const tables = self.$store.getters.getTables;
+      var zip = new JSZip();
+
+      if (!_.isEmpty(tables)) {
+        for (let index = 0; index < tables.length; index++) {
+          const table = tables[index];
+          const guests = _.get(table, "guests");
+        }
+      }
+
+      // create a file
+      zip.file("hello.txt", "Hello[p my)6cxsw2q");
+      // oops, cat on keyboard. Fixing !
+      zip.file("hello.txt", "Hello World\n");
+
+      // create a file and a folder
+      zip.file("nested/hello.txt", "Hello World\n");
+      // same as
+      zip.folder("nested").file("hello.txt", "Hello World\n");
+
+      var promise = null;
+      if (JSZip.support.uint8array) {
+        promise = zip.generateAsync({ type: "uint8array" });
+      } else {
+        promise = zip.generateAsync({ type: "string" });
       }
     },
     generateQRCode(guest, index) {

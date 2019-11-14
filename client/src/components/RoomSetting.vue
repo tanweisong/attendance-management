@@ -10,21 +10,11 @@
         "
         variant="outline-dark"
         block
-        >{{ topType }}</b-button
-      >
-      <b-popover
-        target="topSelection"
-        triggers="focus"
-        placement="auto"
-        :show.sync="topVisible"
-      >
+      >{{ topType }}</b-button>
+      <b-popover target="topSelection" triggers="focus" placement="auto" :show.sync="topVisible">
         <div>
           <b-form-group label="Entrance/Exit or Screen?" inline>
-            <b-form-radio-group
-              v-model="topSelection"
-              name="topSelection"
-              inline
-            >
+            <b-form-radio-group v-model="topSelection" name="topSelection" inline>
               <b-form-radio value="1">Entrance / Exit</b-form-radio>
               <b-form-radio value="2">Screen</b-form-radio>
             </b-form-radio-group>
@@ -34,21 +24,13 @@
               class="btn-sm mx-1"
               variant="outline-secondary"
               @click="selectionCancel('top')"
-              >Clear</b-button
-            >
-            <b-button
-              class="btn-sm"
-              variant="outline-dark"
-              @click="selectionUpdate('top')"
-              >OK</b-button
-            >
+            >Clear</b-button>
+            <b-button class="btn-sm" variant="outline-dark" @click="selectionUpdate('top')">OK</b-button>
           </div>
         </div>
       </b-popover>
     </div>
-    <div
-      class="center-row d-flex flex-row flex-grow-5 align-items-stretch flex-nowrap"
-    >
+    <div class="center-row d-flex flex-row flex-grow-5 align-items-stretch flex-nowrap">
       <div>
         <div
           id="leftSelection"
@@ -58,22 +40,11 @@
               : 'btn btn-sm leftSelection btn-outline-dark'
           "
           @click="leftVisible = !leftVisible"
-        >
-          {{ leftType }}
-        </div>
-        <b-popover
-          target="leftSelection"
-          :show="leftVisible"
-          triggers="click"
-          placement="auto"
-        >
+        >{{ leftType }}</div>
+        <b-popover target="leftSelection" :show="leftVisible" triggers="click" placement="auto">
           <div>
             <b-form-group label="Entrance/Exit or Screen?" inline>
-              <b-form-radio-group
-                v-model="leftSelection"
-                name="leftSelection"
-                inline
-              >
+              <b-form-radio-group v-model="leftSelection" name="leftSelection" inline>
                 <b-form-radio value="1">Entrance / Exit</b-form-radio>
                 <b-form-radio value="2">Screen</b-form-radio>
               </b-form-radio-group>
@@ -83,31 +54,19 @@
                 class="btn-sm mx-1"
                 variant="outline-secondary"
                 @click="selectionCancel('left')"
-                >Clear</b-button
-              >
-              <b-button
-                class="btn-sm"
-                variant="outline-primary"
-                @click="selectionUpdate('left')"
-                >OK</b-button
-              >
+              >Clear</b-button>
+              <b-button class="btn-sm" variant="outline-primary" @click="selectionUpdate('left')">OK</b-button>
             </div>
           </div>
         </b-popover>
       </div>
-      <div
-        class="table-main d-flex flex-column flex-nowrap align-items-stretch"
-      >
+      <div class="table-main d-flex flex-column flex-nowrap align-items-stretch">
         <div
           v-for="(row, index) in tableConfigurations"
           :key="index"
           class="table-main-row d-flex flex-row align-items-center flex-nowrap"
         >
-          <div
-            v-for="configuration in row"
-            :key="configuration.id"
-            :style="colWidth"
-          >
+          <div v-for="configuration in row" :key="configuration.id" :style="colWidth">
             <div
               :class="tableConfigurationClass(configuration)"
               @click="tableConfiguration(configuration)"
@@ -119,9 +78,9 @@
               "
             >
               <div class="tableBtn">{{ computeTableLabel(configuration) }}</div>
-              <div :class="computeTableLabelSecondaryClass(configuration)">
-                {{ computeTableLabelSecondary(configuration) }}
-              </div>
+              <div
+                :class="computeTableLabelSecondaryClass(configuration)"
+              >{{ computeTableLabelSecondary(configuration) }}</div>
             </div>
           </div>
         </div>
@@ -135,22 +94,11 @@
               : 'btn btn-sm rightSelection btn-outline-dark'
           "
           @click="rightVisible = !rightVisible"
-        >
-          {{ rightType }}
-        </div>
-        <b-popover
-          target="rightSelection"
-          triggers="click"
-          placement="auto"
-          :show="rightVisible"
-        >
+        >{{ rightType }}</div>
+        <b-popover target="rightSelection" triggers="click" placement="auto" :show="rightVisible">
           <div>
             <b-form-group label="Entrance/Exit or Screen?" inline>
-              <b-form-radio-group
-                v-model="rightSelection"
-                name="rightSelection"
-                inline
-              >
+              <b-form-radio-group v-model="rightSelection" name="rightSelection" inline>
                 <b-form-radio value="1">Entrance / Exit</b-form-radio>
                 <b-form-radio value="2">Screen</b-form-radio>
               </b-form-radio-group>
@@ -160,14 +108,12 @@
                 class="btn-sm mx-1"
                 variant="outline-secondary"
                 @click="selectionCancel('right')"
-                >Clear</b-button
-              >
+              >Clear</b-button>
               <b-button
                 class="btn-sm"
                 variant="outline-primary"
                 @click="selectionUpdate('right')"
-                >OK</b-button
-              >
+              >OK</b-button>
             </div>
           </div>
         </b-popover>
@@ -183,8 +129,7 @@
         "
         variant="outline-dark"
         block
-        >{{ bottomType }}</b-button
-      >
+      >{{ bottomType }}</b-button>
       <b-popover
         target="bottomSelection"
         triggers="click"
@@ -193,11 +138,7 @@
       >
         <div>
           <b-form-group label="Entrance/Exit or Screen?" inline>
-            <b-form-radio-group
-              v-model="bottomSelection"
-              name="bottomSelection"
-              inline
-            >
+            <b-form-radio-group v-model="bottomSelection" name="bottomSelection" inline>
               <b-form-radio value="1">Entrance / Exit</b-form-radio>
               <b-form-radio value="2">Screen</b-form-radio>
             </b-form-radio-group>
@@ -207,24 +148,13 @@
               class="btn-sm mx-1"
               variant="outline-secondary"
               @click="selectionCancel('bottom')"
-              >Clear</b-button
-            >
-            <b-button
-              class="btn-sm"
-              variant="outline-dark"
-              @click="selectionUpdate('bottom')"
-              >OK</b-button
-            >
+            >Clear</b-button>
+            <b-button class="btn-sm" variant="outline-dark" @click="selectionUpdate('bottom')">OK</b-button>
           </div>
         </div>
       </b-popover>
     </div>
-    <b-modal
-      ref="tableConfiguration"
-      centered
-      title="Table Configuration"
-      size="md"
-    >
+    <b-modal ref="tableConfiguration" centered title="Table Configuration" size="md">
       <b-form>
         <b-form-group label="Name" label-size="sm">
           <b-form-select
@@ -234,12 +164,7 @@
             :value="table.name"
           ></b-form-select>
         </b-form-group>
-        <b-table
-          :items="table.guests"
-          small
-          :fields="fields"
-          thead-class="small"
-        >
+        <b-table :items="table.guests" small :fields="fields" thead-class="small">
           <template v-slot:table-colgroup="scope">
             <col
               v-for="field in scope.fields"
@@ -255,11 +180,7 @@
             />
           </template>
           <template v-slot:cell(name)="row">
-            <b-form-input
-              v-model="row.item.name"
-              size="sm"
-              @change="addNewGuest(table)"
-            ></b-form-input>
+            <b-form-input v-model="row.item.name" size="sm" @change="addNewGuest(table)"></b-form-input>
           </template>
           <template v-slot:cell(adult)="row">
             <b-form-input
@@ -282,13 +203,7 @@
             ></b-form-input>
           </template>
           <template v-slot:cell(pax)="row">
-            <b-form-input
-              type="number"
-              v-model="row.item.pax"
-              size="sm"
-              disabled
-              number
-            ></b-form-input>
+            <b-form-input type="number" v-model="row.item.pax" size="sm" disabled number></b-form-input>
           </template>
           <template v-slot:cell(action)="row">
             <b-button
@@ -308,14 +223,8 @@
           variant="outline-secondary"
           @click="resetTableConfiguration"
           class="mr-1"
-          >Reset</b-button
-        >
-        <b-button
-          size="sm"
-          variant="outline-primary"
-          @click="updateTableConfiguration"
-          >OK</b-button
-        >
+        >Reset</b-button>
+        <b-button size="sm" variant="outline-primary" @click="updateTableConfiguration">OK</b-button>
       </template>
     </b-modal>
     <loader></loader>
@@ -341,9 +250,6 @@ export default {
   props: {
     tableConfigurations: {
       type: Array
-    },
-    numOfCols: {
-      type: Number
     }
   },
   data() {
@@ -396,6 +302,18 @@ export default {
     };
   },
   computed: {
+    numOfCols() {
+      const self = this;
+      const tableConfigurations = self.tableConfigurations;
+
+      if (!_.isEmpty(tableConfigurations)) {
+        const firstRow = tableConfigurations[0];
+
+        if (!self.isNullOrEmpty(firstRow)) return firstRow.length;
+      }
+
+      return 0;
+    },
     minPaxPerTable() {
       const self = this;
 

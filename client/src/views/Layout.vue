@@ -4,12 +4,7 @@
       <b-form>
         <div class="form-row">
           <div class="md-col-4">
-            <b-form-group
-              label="Num. of row(s)"
-              class="mr-sm-2"
-              label-size="sm"
-              for="numOfRows"
-            >
+            <b-form-group label="Num. of row(s)" class="mr-sm-2" label-size="sm" for="numOfRows">
               <b-form-input
                 id="numOfRows"
                 autocomplete="new-password"
@@ -25,12 +20,7 @@
             </b-form-group>
           </div>
           <div class="md-col-4">
-            <b-form-group
-              class="mr-sm-2"
-              label-size="sm"
-              label="Num. of col(s)"
-              for="numOfCols"
-            >
+            <b-form-group class="mr-sm-2" label-size="sm" label="Num. of col(s)" for="numOfCols">
               <b-form-input
                 id="numOfCols"
                 type="number"
@@ -46,16 +36,11 @@
             </b-form-group>
           </div>
         </div>
-        <b-button variant="outline-primary" class="btn-sm" @click="update"
-          >Update</b-button
-        >
+        <b-button variant="outline-primary" class="btn-sm" @click="update">Update</b-button>
       </b-form>
     </div>
     <div class="content">
-      <room-setting
-        :tableConfigurations="tableConfigurations"
-        :numOfCols="numOfCols"
-      ></room-setting>
+      <room-setting :tableConfigurations="tableConfigurations"></room-setting>
     </div>
     <loader></loader>
   </div>
@@ -135,10 +120,44 @@ export default {
     }
   },
   methods: {
+    addCol(row, push) {
+      const self = this;
+
+      if (!self.isNull(row)) {
+        if (!self.isNullOrEmpty(push) && push)
+          row = _.concat(row, {
+            col: null,
+            row: null
+          });
+        else
+          row = _.concat(
+            {
+              col: null,
+              row: null
+            },
+            row
+          );
+      }
+
+      return row;
+    },
     addTableConfigurationRow(row) {
       const self = this;
 
       self.$store.dispatch("addTableConfigurationRow", row);
+    },
+    buildCols(row) {
+      const self = this;
+      const iNumOfCols = self.numOfCols;
+
+      if (!self.isNull(row)) {
+        for (let index = 0; index < iNumOfCols; index++) {
+          row.push({
+            col: null,
+            row: null
+          });
+        }
+      }
     },
     async createTables(aTables) {
       const self = this;
@@ -171,9 +190,15 @@ export default {
     },
     async updateLogin() {
       const self = this;
+      let tableConfigurationsClone = _.slice(self.tableConfigurations);
+
+      tableConfigurationsClone = self.rebuildTableConfigurations(
+        tableConfigurationsClone
+      );
+
       let login = await LoginService.updateConfiguration({
         email: self.$store.getters.getEmail,
-        tableConfigurations: self.tableConfigurations
+        tableConfigurations: tableConfigurationsClone
       });
 
       if (_.isArray(login)) login = login[0];
@@ -188,49 +213,130 @@ export default {
       _.forIn(self.rules, function(value, key) {
         self.validate(key);
       });
+    },
+    rebuildTableConfigurations(tableConfigurations) {
+      const self = this;
 
       if (self.numOfRows > 0 && self.numOfCols > 0) {
-        if (self.isNullOrEmpty(self.tableConfigurations))
+        if (self.isNullOrEmpty(tableConfigurations))
           for (var iRowIndex = 1; iRowIndex <= self.numOfRows; iRowIndex++) {
             var oRow = [];
-            for (var iColIndex = 1; iColIndex <= self.numOfCols; iColIndex++) {
-              oRow.push({
-                row: iRowIndex - 1,
-                col: iColIndex - 1
-              });
-            }
+            self.buildCols(oRow);
 
-            self.addTableConfigurationRow(oRow);
+            tableConfigurations.push(oRow);
           }
         else {
-          var bHasConfiguration = false;
+          let iCurrentRowCount = 0;
+          let iCurrentColCount = 0;
 
-          for (
-            var iRowIndex = 0;
-            iRowIndex < self.tableConfigurations.length;
-            iRowIndex++
-          ) {
-            var oRow = self.tableConfigurations[iRowIndex];
+          if (!_.isEmpty(tableConfigurations)) {
+            iCurrentRowCount = tableConfigurations.length;
 
-            if (!self.isNull(oRow)) {
-              for (var iColIndex = 0; iColIndex < oRow.length; iColIndex++) {
-                var oTable = oRow[iColIndex];
-                var aGuests = _.get(oTable, "guests");
+            const firstRow = tableConfigurations[0];
+            iCurrentColCount = firstRow.length;
+          }
 
-                if (!self.isNullOrEmpty(aGuests)) {
-                  bHasConfiguration = true;
-                  break;
-                }
+          let rowDiff = self.numOfRows - iCurrentRowCount;
+          let colDiff = self.numOfCols - iCurrentColCount;
+
+          if (colDiff < 0) {
+            colDiff = colDiff * -1;
+            for (var index = 0; index < tableConfigurations.length; index++) {
+              var row = tableConfigurations[index];
+              for (var colindex = 1; colindex <= colDiff; colindex++) {
+                if (colindex % 2 === 0)
+                  row = self.removeItemFromArray(row, true);
+                else row = self.removeItemFromArray(row);
+              }
+
+              tableConfigurations[index] = row;
+            }
+          } else {
+            for (var index = 0; index < tableConfigurations.length; index++) {
+              var row = tableConfigurations[index];
+              for (var colindex = 1; colindex <= colDiff; colindex++) {
+                if (colindex % 2 === 0) row = self.addCol(row, true);
+                else row = self.addCol(row, false);
+              }
+
+              tableConfigurations[index] = row;
+            }
+          }
+
+          if (rowDiff < 0) {
+            rowDiff = rowDiff * -1;
+            for (var index = 1; index <= rowDiff; index++) {
+              if (index % 2 === 0)
+                tableConfigurations = self.removeItemFromArray(
+                  tableConfigurations,
+                  true
+                );
+              else
+                tableConfigurations = self.removeItemFromArray(
+                  tableConfigurations
+                );
+            }
+          } else {
+            for (var index = 1; index <= rowDiff; index++) {
+              var newRow = [];
+              self.buildCols(newRow);
+
+              if (index % 2 === 0) {
+                tableConfigurations = _.concat(tableConfigurations, [newRow]);
+              } else {
+                tableConfigurations = _.concat([newRow], tableConfigurations);
               }
             }
           }
 
-          if (!bHasConfiguration) {
-            self.tableConfigurations = [];
-            self.mappingValueChange();
+          self.recalculateTableConfigurations(tableConfigurations);
+        }
+      } else if (self.numOfRows === 0) {
+        const tableConfigurations = self.$store.getters.getTableConfigurations;
+        let iCurrentRowCount = 0;
+
+        if (!_.isEmpty(tableConfigurations)) {
+          iCurrentRowCount = tableConfigurations.length;
+        }
+      } else if (self.numOfCols === 0) {
+        const tableConfigurations = self.$store.getters.getTableConfigurations;
+        let iCurrentColCount = 0;
+
+        if (!_.isEmpty(tableConfigurations)) {
+          var firstRow = tableConfigurations[0];
+
+          if (!isNullOrEmpty(firstRow)) {
+            iCurrentColCount = firstRow.length;
           }
         }
       }
+
+      return tableConfigurations;
+    },
+    recalculateTableConfigurations(tableConfigurations) {
+      for (let index = 0; index < tableConfigurations.length; index++) {
+        let row = tableConfigurations[index];
+        for (var rowIndex = 0; rowIndex < row.length; rowIndex++) {
+          let col = row[rowIndex];
+          _.set(col, "col", rowIndex);
+          _.set(col, "row", index);
+          _.unset(col, "guests");
+          _.unset(col, "id");
+          _.unset(col, "name");
+          _.unset(col, "_id");
+          _.unset(col, "email");
+        }
+      }
+    },
+    removeItemFromArray(array, pop) {
+      const self = this;
+
+      if (!_.isEmpty(array)) {
+        if (!self.isNullOrEmpty(pop) && pop) array = _.dropRight(array);
+        else array = _.drop(array);
+      }
+
+      return array;
     },
     validate(prop) {
       const self = this;
