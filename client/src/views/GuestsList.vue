@@ -1,5 +1,9 @@
 <template>
   <div class="content">
+    <b-alert variant="danger" :show="showGetNewQRCodeAlert"
+      >There are changes to some of the guests. Please get the newly generated
+      QR codes!</b-alert
+    >
     <header>
       <b-form inline class="mb-4">
         <label class="mr-sm-2" for="search" label-size="sm">Search:</label>
@@ -26,16 +30,17 @@
         <!-- <b-button
           variant="outline-primary"
           @click="updateTables"
-          class="guestsListSaveBtn"
+          class="guestsListSaveBtn mr-2"
           size="sm"
-        >Save Changes</b-button>-->
-        <b-button
+          >Save Changes</b-button
+        > -->
+        <!-- <b-button
           variant="outline-primary"
           class="guestsListSaveBtn"
           size="sm"
           @click="generateAndDownloadQRCodes"
           >Download all QR Codes</b-button
-        >
+        > -->
       </b-form>
     </header>
     <b-card-group columns>
@@ -62,7 +67,7 @@
             thead-class="small"
             v-if="window.width >= 768"
             ref="guestsTable"
-            id="guestsTable"
+            class="guestsTable"
           >
             <template v-slot:table-colgroup="scope">
               <col
@@ -75,19 +80,21 @@
                       : _.indexOf(['pax', 'adult', 'child'], field.key) > -1
                       ? '75px'
                       : field.key === 'checkin'
-                      ? '40px'
+                      ? '20px'
                       : 'auto'
                 }"
               />
             </template>
             <template v-slot:cell(checkin)="row">
               <b-form-checkbox
+                plain
                 :id="`checkin-${table._id}-${row.index}`"
                 v-model="row.item.checkin"
                 size="lg"
                 :disabled="
                   isNullOrEmpty(row.item.name) || isNullOrEmpty(row.item._id)
                 "
+                @change="checkinGuest(table, row.item)"
               ></b-form-checkbox>
               <!-- <b-tooltip
                 :target="`checkin-${table._id}-${row.index}`"
@@ -98,7 +105,7 @@
               <b-form-input
                 v-model="row.item.name"
                 size="sm"
-                @change="addNewGuest(table)"
+                @change="guestNameChange(table, row.item)"
               ></b-form-input>
             </template>
             <template v-slot:cell(contact)="row">
@@ -111,7 +118,7 @@
                 size="sm"
                 number
                 min="0"
-                @change="paxChange(table, row.item, true)"
+                @update="paxChange(table, row.item)"
               ></b-form-input>
             </template>
             <template v-slot:cell(child)="row">
@@ -121,7 +128,7 @@
                 size="sm"
                 number
                 min="0"
-                @change="paxChange(table, row.item, true)"
+                @update="paxChange(table, row.item)"
               ></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
@@ -139,7 +146,9 @@
                   isNullOrEmpty(row.item.name) || isNullOrEmpty(row.item._id)
                 "
                 size="sm"
-                variant="outline-primary"
+                :variant="
+                  row.item.regenerateCode ? 'outline-danger' : 'outline-primary'
+                "
                 class="mr-2"
                 @click="generateQRCode(row.item, row.index)"
               >
@@ -160,7 +169,7 @@
           <b-table
             :items="table.guests"
             ref="reduceGuestsTable"
-            id="reduceGuestsTable"
+            class="reduceGuestsTable"
             small
             :fields="reduceFields"
             thead-class="small"
@@ -177,19 +186,21 @@
                       : _.indexOf(['pax'], field.key) > -1
                       ? '75px'
                       : field.key === 'checkin'
-                      ? '40px'
-                      : window.width - 40 - 75 - 40 - 40 + 'px'
+                      ? '20px'
+                      : window.width - 40 - 75 - 40 - 20 + 'px'
                 }"
               />
             </template>
             <template v-slot:cell(checkin)="row">
               <b-form-checkbox
+                plain
                 :id="`checkin-${table._id}-${row.index}`"
                 size="lg"
                 v-model="row.item.checkin"
                 :disabled="
                   isNullOrEmpty(row.item.name) || isNullOrEmpty(row.item._id)
                 "
+                @change="checkinGuest(table, row.item)"
               ></b-form-checkbox>
               <!-- <b-tooltip
                 :target="`checkin-${table._id}-${row.index}`"
@@ -200,7 +211,6 @@
               <b-form-input
                 v-model="row.item.name"
                 size="sm"
-                @change="addNewGuest(table)"
                 disabled
               ></b-form-input>
             </template>
@@ -236,6 +246,7 @@
                   >
                   <b-list-group-item
                     @click="generateQRCode(row.item, row.index)"
+                    :variant="row.item.regenerateCode ? 'danger' : ''"
                     >View QR Code</b-list-group-item
                   >
                   <b-list-group-item
@@ -257,7 +268,8 @@
       @shown="tableConfigurationShown"
     >
       <div class="qrcodeContainer">
-        <canvas id="qrcodeContainer"></canvas>
+        <!-- <canvas id="qrcodeContainer"></canvas> -->
+        <b-img :src="guest.code"></b-img>
         <a href="#" id="qrcodelink" :download="`${guest.name}-qrcode.png`" />
       </div>
       <template v-slot:modal-footer>
@@ -289,7 +301,7 @@
             v-model="guest.adult"
             number
             min="0"
-            @change="guestPaxChange"
+            @update="guestPaxChange"
           ></b-form-input>
         </b-form-group>
         <b-form-group label="Child:" label-for="guest-child">
@@ -299,7 +311,7 @@
             v-model="guest.child"
             number
             min="0"
-            @change="guestPaxChange"
+            @update="guestPaxChange"
           ></b-form-input>
         </b-form-group>
         <b-form-group label="Pax:" label-for="guest-pax">
@@ -326,6 +338,7 @@
 import app from "../functions/app";
 import QRCode from "qrcode";
 import JSZip from "jszip";
+import { saveAs } from "file-saver";
 import Loader from "../components/Loader";
 import LoginService from "../services/LoginService";
 import TableService from "../services/TableService";
@@ -370,15 +383,10 @@ export default {
     window.removeEventListener("resize", this.handleResize);
   },
   computed: {
-    numOfTables() {
+    email() {
       const self = this;
 
-      return self.$store.getters.getNumOfTables;
-    },
-    minPaxPerTable() {
-      const self = this;
-
-      return self.$store.getters.getMinPaxPerTable;
+      return self.$store.getters.getEmail;
     },
     fields() {
       const self = this;
@@ -398,6 +406,16 @@ export default {
         }
       ];
     },
+    numOfTables() {
+      const self = this;
+
+      return self.$store.getters.getNumOfTables;
+    },
+    minPaxPerTable() {
+      const self = this;
+
+      return self.$store.getters.getMinPaxPerTable;
+    },
     reduceFields() {
       const self = this;
 
@@ -414,10 +432,31 @@ export default {
         }
       ];
     },
-    email() {
+    showGetNewQRCodeAlert() {
       const self = this;
+      const tables = self.$store.getters.getTables;
+      let showAlert = false;
 
-      return self.$store.getters.getEmail;
+      if (!_.isEmpty(tables)) {
+        for (var index = 0; index < tables.length; index++) {
+          var table = tables[index];
+          var guests = _.get(table, "guests");
+
+          if (!_.isEmpty(guests)) {
+            for (var guestIndex = 0; guestIndex < guests.length; guestIndex++) {
+              var guest = guests[guestIndex];
+              const regenerateCode = _.get(guest, "regenerateCode");
+
+              if (!self.isNullOrEmpty(regenerateCode) && regenerateCode) {
+                showAlert = true;
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      return showAlert;
     },
     tables: {
       get() {
@@ -461,6 +500,30 @@ export default {
         });
 
       _.set(table, "guests", aGuests);
+    },
+    async checkinGuest(inTable, inGuest) {
+      const self = this;
+      const inGuestId = _.get(inGuest, "_id");
+      const inTableId = _.get(inTable, "_id");
+
+      if (!_.isEmpty(inTable) && !self.isNullOrEmpty(inGuestId)) {
+        var guests = _.get(inTable, "guests");
+        if (!_.isEmpty(guests)) {
+          for (let index = 0; index < guests.length; index++) {
+            const guest = guests[index];
+            const guestId = _.get(guest, "_id");
+
+            if (guestId === inGuestId) {
+              _.set(inGuest, "checkin", true);
+
+              guests[index] = inGuest;
+
+              self.updateTables();
+              break;
+            }
+          }
+        }
+      }
     },
     checkTableOverCapacity(table) {
       const self = this;
@@ -590,7 +653,7 @@ export default {
         }
       }
     },
-    generateAndDownloadQRCodes() {
+    async generateAndDownloadQRCodes() {
       const self = this;
       const tables = self.$store.getters.getTables;
       var zip = new JSZip();
@@ -598,26 +661,51 @@ export default {
       if (!_.isEmpty(tables)) {
         for (let index = 0; index < tables.length; index++) {
           const table = tables[index];
+          const tableName = _.get(table, "name");
+          var oTableFolder = zip.folder(tableName);
+
           const guests = _.get(table, "guests");
+          if (!_.isEmpty(guests)) {
+            for (var guestIndex = 0; guestIndex < guests.length; guestIndex++) {
+              const guest = guests[guestIndex];
+              var guestName = _.get(guest, "name");
+              const guestId = _.get(guest, "_id");
+
+              if (!self.isNullOrEmpty(guestName)) {
+                guestName = _.trim(guestName);
+                guestName = _.toLower(guestName);
+              }
+
+              let codeString = guestId + "/" + guestName;
+
+              // await QRCode.toDataURL(codeString).then(response => {
+              //   oTableFolder.file(response);
+              // });
+            }
+          }
         }
       }
 
-      // create a file
-      zip.file("hello.txt", "Hello[p my)6cxsw2q");
-      // oops, cat on keyboard. Fixing !
-      zip.file("hello.txt", "Hello World\n");
+      zip
+        .generateAsync({ type: "blob" }, function updateCallback(metadata) {
+          var msg = "progression : " + metadata.percent.toFixed(2) + " %";
+          if (metadata.currentFile) {
+            msg += ", current file = " + metadata.currentFile;
+          }
+          //showMessage(msg);
+          //updatePercent(metadata.percent | 0);
+        })
+        .then(
+          function callback(blob) {
+            // see FileSaver.js
+            saveAs(blob, "example.zip");
 
-      // create a file and a folder
-      zip.file("nested/hello.txt", "Hello World\n");
-      // same as
-      zip.folder("nested").file("hello.txt", "Hello World\n");
-
-      var promise = null;
-      if (JSZip.support.uint8array) {
-        promise = zip.generateAsync({ type: "uint8array" });
-      } else {
-        promise = zip.generateAsync({ type: "string" });
-      }
+            //showMessage("done !");
+          },
+          function(e) {
+            //showError(e);
+          }
+        );
     },
     generateQRCode(guest, index) {
       const self = this;
@@ -626,18 +714,81 @@ export default {
 
       self.$refs["tableConfiguration"].show();
     },
+    async guestNameChange(inTable, inGuest) {
+      const self = this;
+      let inGuestName = _.get(inGuest, "name");
+      const inGuestId = _.get(inGuest, "_id");
+      const guestCode = _.get(inGuest, "code");
+      const inTableId = _.get(inTable, "_id");
+
+      if (self.isNullOrEmpty(inGuestId)) {
+        await self.updateTables();
+
+        var tables = self.tables;
+
+        if (!_.isEmpty(tables)) {
+          for (var index = 0; index < tables.length; index++) {
+            var table = tables[index];
+            var tableId = _.get(table, "_id");
+
+            if (tableId === inTableId) {
+              const guests = _.get(table, guests);
+
+              if (!_.isEmpty(guests)) {
+                for (
+                  var guestIndex = 0;
+                  guestIndex < guests.length;
+                  guestIndex++
+                ) {
+                  const guest = guests[guestIndex];
+                  const guestName = _.get(guest, "name");
+
+                  if (inGuestName === guestName) {
+                    self.guestNameChange(inTable, guest);
+                    break;
+                  }
+                }
+              }
+
+              break;
+            }
+          }
+        }
+      }
+
+      if (!self.isNullOrEmpty(inGuestName)) {
+        inGuestName = _.trim(inGuestName);
+        inGuestName = _.toLower(inGuestName);
+      }
+
+      var codeString = inGuestId + "/" + inGuestName;
+      var newQRString = "";
+
+      await QRCode.toDataURL(codeString).then(response => {
+        newQRString = response;
+      });
+
+      if (newQRString !== guestCode) {
+        _.set(inGuest, "regenerateCode", true);
+        _.set(inGuest, "code", newQRString);
+
+        self.updateTables();
+      } else {
+        self.addNewGuest(inTable);
+      }
+    },
     guestPaxChange() {
       const self = this;
       const guest = self.guest;
       const table = _.get(guest, "table");
 
-      self.paxChange(table, guest, false);
+      self.paxChange(table, guest);
     },
     handleResize() {
       this.window.width = window.innerWidth;
       this.window.height = window.innerHeight;
     },
-    paxChange(table, guest, bUpdateTableGuest) {
+    paxChange(table, guest) {
       const self = this;
 
       if (!self.isNull(self.paxChangeDebounce)) {
@@ -661,21 +812,45 @@ export default {
 
         _.set(guest, "pax", pax);
 
-        if (bUpdateTableGuest) self.addNewGuest(table);
-      }, 200);
+        self.updateGuestInTables();
+        self.updateTables();
+      }, 100);
 
       self.paxChangeDebounce();
     },
-    tableConfigurationShown() {
+    async tableConfigurationShown() {
       const self = this;
       const container = document.getElementById("qrcodeContainer");
       const guest = self.guest;
       const guestId = _.get(guest, "_id");
+      let guestName = _.get(guest, "name");
+      const code = _.get(guest, "code");
+      const regenerateCode = _.get(guest, "regenerateCode");
 
-      if (!self.isNullOrEmpty(guestId))
-        QRCode.toDataURL(container, guestId).then(response => {
-          document.getElementById("qrcodelink").href = response;
-        });
+      if (
+        (!self.isNullOrEmpty(regenerateCode) && regenerateCode) ||
+        self.isNullOrEmpty(code)
+      ) {
+        if (!self.isNullOrEmpty(guestName)) {
+          guestName = _.trim(guestName);
+          guestName = _.toLower(guestName);
+        }
+
+        let codeString = guestId + "/" + guestName;
+
+        if (!self.isNullOrEmpty(codeString))
+          await QRCode.toDataURL(codeString).then(response => {
+            document.getElementById("qrcodelink").href = response;
+            self.$set(guest, "code", response);
+            self.$set(guest, "regenerateCode", null);
+
+            self.updateGuestInTables();
+
+            self.updateTables();
+          });
+      } else {
+        document.getElementById("qrcodelink").href = code;
+      }
     },
     searchTables(e) {
       const self = this;
@@ -709,11 +884,38 @@ export default {
             self.$refs["guestConfiguration"].hide();
 
             if (self.window.width >= 768) {
-              this.$root.$emit("bv::refresh::table", "guestsTable");
+              this.$refs.guestsTable.refresh();
+              // this.$root.$emit("bv::refresh::table", "guestsTable");
             } else {
-              this.$root.$emit("bv::refresh::table", "reduceGuestsTable");
+              this.$refs.reduceGuestsTable.refresh();
+              // this.$root.$emit("bv::refresh::table", "reduceGuestsTable");
             }
             break;
+          }
+        }
+      }
+    },
+    updateGuestInTables() {
+      const self = this;
+      let tables = self.tables;
+      const inGuest = self.guest;
+      const inGuestId = _.get(inGuest, "_id");
+
+      if (!_.isEmpty(tables)) {
+        for (var index = 0; index < tables.length; index++) {
+          var table = tables[index];
+          var guests = _.get(table, "guests");
+
+          if (!_.isEmpty(guests)) {
+            for (var guestIndex = 0; guestIndex < guests.length; guestIndex++) {
+              var guest = guests[guestIndex];
+              var guestId = _.get(guest, "_id");
+
+              if (guestId === inGuestId) {
+                guests[guestIndex] = _.cloneDeep(inGuest);
+                break;
+              }
+            }
           }
         }
       }
@@ -788,6 +990,7 @@ export default {
       self.$store.dispatch("setShowLoader", false);
 
       this.$bvToast.toast("Changes saved successfully", {
+        variant: "success",
         autoHideDelay: 5000
       });
 
@@ -830,6 +1033,11 @@ export default {
     -webkit-column-count: 3;
     -moz-column-count: 3;
     column-count: 3;
+  }
+  @media print {
+    -webkit-column-count: 2;
+    -moz-column-count: 2;
+    column-count: 2;
   }
 }
 @media screen and (max-width: 414px) {

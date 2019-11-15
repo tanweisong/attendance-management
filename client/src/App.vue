@@ -20,6 +20,47 @@ export default {
   .control-group {
     display: none !important;
   }
+  .guestsTable {
+    & thead {
+      & > tr {
+        & th:nth-child(4),
+        & th:nth-child(5),
+        & th:nth-child(7) {
+          display: none !important;
+        }
+      }
+    }
+    & tbody {
+      & > tr {
+        & td:nth-child(4),
+        & td:nth-child(5),
+        & td:nth-child(7) {
+          display: none !important;
+        }
+      }
+    }
+  }
+  .reduceGuestsTable {
+    & thead {
+      & > tr {
+        & th:nth-child(1),
+        & th:nth-child(4) {
+          display: none !important;
+        }
+        & th:nth-child(2) {
+          width: 80%;
+        }
+      }
+    }
+    & tbody {
+      & > tr {
+        & td:nth-child(1),
+        & td:nth-child(4) {
+          display: none !important;
+        }
+      }
+    }
+  }
 }
 .buttons {
   display: flex;

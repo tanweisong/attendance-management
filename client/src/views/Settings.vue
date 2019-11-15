@@ -1,20 +1,38 @@
 <template>
   <div class="content">
-    <b-alert v-if="(!isNullOrEmpty(numOfTables))" variant="success" show>You are all set to go!</b-alert>
+    <b-alert v-if="!isNullOrEmpty(numOfTables)" variant="success" show
+      >You may now proceed to setup your guests list</b-alert
+    >
     <b-form>
       <div class="form-row">
-        <b-form-group label="Num. of table(s)" class="col-md-3 col-lg-3 col-xl-2" label-size="sm">
-          <b-form-input type="number" v-model="numOfTables" number size="sm"></b-form-input>
+        <b-form-group
+          label="Num. of table(s)"
+          class="col-md-3 col-lg-3 col-xl-2"
+          label-size="sm"
+        >
+          <b-form-input
+            type="number"
+            v-model="numOfTables"
+            number
+            size="sm"
+          ></b-form-input>
         </b-form-group>
         <b-form-group
           label="Num. of pax per table"
           class="col-md-3 col-lg-3 col-xl-2"
           label-size="sm"
         >
-          <b-form-input type="number" v-model="minPaxPerTable" number size="sm"></b-form-input>
+          <b-form-input
+            type="number"
+            v-model="minPaxPerTable"
+            number
+            size="sm"
+          ></b-form-input>
         </b-form-group>
       </div>
-      <b-button variant="outline-primary" @click="updateLogin" size="sm">Update</b-button>
+      <b-button variant="outline-primary" @click="updateLogin" size="sm"
+        >Update</b-button
+      >
     </b-form>
   </div>
 </template>

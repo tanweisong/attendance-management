@@ -1,28 +1,17 @@
 <template>
   <div class="qrcode-main d-flex flex-column align-items-center">
-    <!-- <b-form inline class="mb-4 align-self-stretch pr-4 pl-4 mt-2">
-      <label class="mr-sm-2" for="search" label-size="sm">Search:</label>
-      <b-input-group class="mb-xs-3">
-        <b-form-input
-          id="search"
-          type="search"
-          placeholder="search guest"
-          @keypress.enter="searchGuest"
-          v-model="searchVal"
-          size="sm"
-        ></b-form-input>
-        <b-input-group-append>
-          <b-button variant="outline-secondary" class="mr-sm-2" size="sm" @click="searchTables">
-            <font-awesome-icon icon="search" />
-          </b-button>
-        </b-input-group-append>
-      </b-input-group>
-    </b-form>-->
-    <div class="text-primary font-weight-bold">Scan QR Code to checkin guest</div>
+    <div class="text-primary font-weight-bold">
+      Scan QR Code to checkin guest
+    </div>
     <div class="qrcode-holder mt-3">
       <qrcode-stream @decode="onDecode" @init="onInit" />
     </div>
-    <b-alert variant="danger" class="mt-4" :show="!isNullOrEmpty(error)">{{ error }}</b-alert>
+    <b-alert
+      variant="danger"
+      class="mt-4"
+      :show="!isNullOrEmpty(error) ? 500 : false"
+      >{{ error }}</b-alert
+    >
     <div class="qrcode-container d-flex flex-row align-items-center">
       <div class="qrcode-content d-flex flex-column align-items-center"></div>
     </div>
@@ -46,14 +35,16 @@
           size="sm"
           variant="outline-primary"
           @click="checkinGuest"
-          v-if="(isNullOrEmpty(guest.checkin) || !guest.checkin)"
-        >Checkin</b-button>
+          v-if="isNullOrEmpty(guest.checkin) || !guest.checkin"
+          >Checkin</b-button
+        >
         <b-button
           size="sm"
           variant="outline-success"
           v-else
           @click="closeGuestInformation"
-        >{{guest.name}} has already checkin</b-button>
+          >{{ guest.name }} has already checkin</b-button
+        >
       </template>
     </b-modal>
   </div>
@@ -117,6 +108,7 @@ export default {
       self.$refs["guestInformation"].hide();
 
       this.$bvToast.toast(`"${inGuest.name} checkin successfully"`, {
+        variant: "success",
         autoHideDelay: 5000
       });
 
@@ -144,10 +136,10 @@ export default {
 
       return null;
     },
-    onDecode(guestId) {
+    onDecode(codeString) {
       const self = this;
 
-      if (!self.isNullOrEmpty(guestId)) {
+      if (!self.isNullOrEmpty(codeString)) {
         const tables = self.$store.getters.getTables;
 
         if (!_.isEmpty(tables)) {
@@ -165,6 +157,8 @@ export default {
           }
         }
       }
+
+      if (_.isEmpty(guest)) self.error("Guest does not exists");
     },
     async onInit(promise) {
       try {
