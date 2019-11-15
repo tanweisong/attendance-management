@@ -79,7 +79,7 @@
                       ? '80px'
                       : _.indexOf(['pax', 'adult', 'child'], field.key) > -1
                       ? '75px'
-                      : field.key === 'checkin'
+                      : _.indexOf(['checkin', 'checkinPrint'], field.key) > -1
                       ? '20px'
                       : 'auto'
                 }"
@@ -87,7 +87,6 @@
             </template>
             <template v-slot:cell(checkin)="row">
               <b-form-checkbox
-                plain
                 :id="`checkin-${table._id}-${row.index}`"
                 v-model="row.item.checkin"
                 size="lg"
@@ -96,10 +95,6 @@
                 "
                 @change="checkinGuest(table, row.item)"
               ></b-form-checkbox>
-              <!-- <b-tooltip
-                :target="`checkin-${table._id}-${row.index}`"
-                variant="dark"
-              >{{ row.item.name }} has checked in</b-tooltip>-->
             </template>
             <template v-slot:cell(name)="row">
               <b-form-input
@@ -193,7 +188,6 @@
             </template>
             <template v-slot:cell(checkin)="row">
               <b-form-checkbox
-                plain
                 :id="`checkin-${table._id}-${row.index}`"
                 size="lg"
                 v-model="row.item.checkin"
@@ -202,10 +196,6 @@
                 "
                 @change="checkinGuest(table, row.item)"
               ></b-form-checkbox>
-              <!-- <b-tooltip
-                :target="`checkin-${table._id}-${row.index}`"
-                variant="dark"
-              >{{ row.item.name }} has checked in</b-tooltip>-->
             </template>
             <template v-slot:cell(name)="row">
               <b-form-input
