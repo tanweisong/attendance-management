@@ -43,8 +43,7 @@ module.exports = {
 
 async function loadTableCollection() {
   const client = await mongodb.MongoClient.connect(
-    // "mongodb+srv://m001-student:m001-mongodb-basics@weisong-m001-2ma6a.mongodb.net/test?retryWrites=true&w=majority",
-    "mongodb://127.0.0.1:27017",
+    "mongodb://172.104.181.117:27017",
     {
       useNewUrlParser: true
     }
