@@ -7,8 +7,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
-const login = require("./routes/api/login");
-const table = require("./routes/api/table");
+const login = require("./routes/login");
+const table = require("./routes/table");
 
 app.use("/api/login", login);
 app.use("/api/table", table);

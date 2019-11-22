@@ -1,9 +1,9 @@
 <template>
   <div class="content">
-    <b-alert variant="danger" :show="showGetNewQRCodeAlert"
-      >There are changes to some of the guests. Please get the newly generated
-      QR codes!</b-alert
-    >
+    <b-alert variant="danger" :show="showGetNewQRCodeAlert">
+      There are changes to some of the guests. Please get the newly generated
+      QR codes!
+    </b-alert>
     <header>
       <b-form inline class="mb-4">
         <label class="mr-sm-2" for="search" label-size="sm">Search:</label>
@@ -17,12 +17,7 @@
             size="sm"
           ></b-form-input>
           <b-input-group-append>
-            <b-button
-              variant="outline-secondary"
-              class="mr-sm-2"
-              size="sm"
-              @click="searchTables"
-            >
+            <b-button variant="outline-secondary" class="mr-sm-2" size="sm" @click="searchTables">
               <font-awesome-icon icon="search" />
             </b-button>
           </b-input-group-append>
@@ -33,14 +28,14 @@
           class="guestsListSaveBtn mr-2"
           size="sm"
           >Save Changes</b-button
-        > -->
+        >-->
         <!-- <b-button
           variant="outline-primary"
           class="guestsListSaveBtn"
           size="sm"
           @click="generateAndDownloadQRCodes"
           >Download all QR Codes</b-button
-        > -->
+        >-->
       </b-form>
     </header>
     <b-card-group columns>
@@ -127,13 +122,7 @@
               ></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
-              <b-form-input
-                type="number"
-                v-model="row.item.pax"
-                disabled
-                size="sm"
-                number
-              ></b-form-input>
+              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
             </template>
             <template v-slot:cell(action)="row">
               <b-button
@@ -198,23 +187,13 @@
               ></b-form-checkbox>
             </template>
             <template v-slot:cell(name)="row">
-              <b-form-input
-                v-model="row.item.name"
-                size="sm"
-                disabled
-              ></b-form-input>
+              <b-form-input v-model="row.item.name" size="sm" disabled></b-form-input>
             </template>
             <template v-slot:cell(contact)="row">
               <b-form-input v-model="row.item.contact" size="sm"></b-form-input>
             </template>
             <template v-slot:cell(pax)="row">
-              <b-form-input
-                type="number"
-                v-model="row.item.pax"
-                disabled
-                size="sm"
-                number
-              ></b-form-input>
+              <b-form-input type="number" v-model="row.item.pax" disabled size="sm" number></b-form-input>
             </template>
             <template v-slot:cell(action)="row">
               <b-button
@@ -230,19 +209,12 @@
                 placement="auto"
               >
                 <b-list-group flush>
-                  <b-list-group-item
-                    @click="editGuest(table, row.item, row.index)"
-                    >Edit Guest</b-list-group-item
-                  >
+                  <b-list-group-item @click="editGuest(table, row.item, row.index)">Edit Guest</b-list-group-item>
                   <b-list-group-item
                     @click="generateQRCode(row.item, row.index)"
                     :variant="row.item.regenerateCode ? 'danger' : ''"
-                    >View QR Code</b-list-group-item
-                  >
-                  <b-list-group-item
-                    @click="deleteGuest(table, row.item, row.index)"
-                    >Delete Guest</b-list-group-item
-                  >
+                  >View QR Code</b-list-group-item>
+                  <b-list-group-item @click="deleteGuest(table, row.item, row.index)">Delete Guest</b-list-group-item>
                 </b-list-group>
               </b-popover>
             </template>
@@ -263,26 +235,16 @@
         <a href="#" id="qrcodelink" :download="`${guest.name}-qrcode.png`" />
       </div>
       <template v-slot:modal-footer>
-        <b-button size="sm" variant="outline-primary" @click="downloadQR"
-          >Download</b-button
-        >
+        <b-button size="sm" variant="outline-primary" @click="downloadQR">Download</b-button>
       </template>
     </b-modal>
     <b-modal ref="guestConfiguration" centered title="Update Guest" size="md">
       <b-form>
         <b-form-group label="Name:" label-for="guest-name">
-          <b-form-input
-            id="guest-name"
-            v-model="guest.name"
-            placeholder="Enter name"
-          ></b-form-input>
+          <b-form-input id="guest-name" v-model="guest.name" placeholder="Enter name"></b-form-input>
         </b-form-group>
         <b-form-group label="Contact:" label-for="guest-contact">
-          <b-form-input
-            id="guest"
-            v-model="guest.contact"
-            placeholder="Enter contact"
-          ></b-form-input>
+          <b-form-input id="guest" v-model="guest.contact" placeholder="Enter contact"></b-form-input>
         </b-form-group>
         <b-form-group label="Adult:" label-for="guest-adult">
           <b-form-input
@@ -305,19 +267,11 @@
           ></b-form-input>
         </b-form-group>
         <b-form-group label="Pax:" label-for="guest-pax">
-          <b-form-input
-            type="number"
-            id="guest-pax"
-            v-model="guest.pax"
-            disabled
-            number
-          ></b-form-input>
+          <b-form-input type="number" id="guest-pax" v-model="guest.pax" disabled number></b-form-input>
         </b-form-group>
       </b-form>
       <template v-slot:modal-footer>
-        <b-button size="sm" variant="outline-primary" @click="updateGuest"
-          >Update</b-button
-        >
+        <b-button size="sm" variant="outline-primary" @click="updateGuest">Update</b-button>
       </template>
     </b-modal>
     <loader></loader>
@@ -754,7 +708,9 @@ export default {
       var codeString = inGuestId + "/" + inGuestName;
       var newQRString = "";
 
-      await QRCode.toDataURL(codeString).then(response => {
+      await QRCode.toDataURL(codeString, {
+        version: 40
+      }).then(response => {
         newQRString = response;
       });
 
@@ -829,7 +785,9 @@ export default {
         let codeString = guestId + "/" + guestName;
 
         if (!self.isNullOrEmpty(codeString))
-          await QRCode.toDataURL(codeString).then(response => {
+          await QRCode.toDataURL(codeString, {
+            version: 40
+          }).then(response => {
             document.getElementById("qrcodelink").href = response;
             self.$set(guest, "code", response);
             self.$set(guest, "regenerateCode", null);

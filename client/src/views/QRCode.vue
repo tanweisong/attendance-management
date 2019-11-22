@@ -1,17 +1,10 @@
 <template>
   <div class="qrcode-main d-flex flex-column align-items-center">
-    <div class="text-primary font-weight-bold">
-      Scan QR Code to checkin guest
-    </div>
+    <div class="text-primary font-weight-bold">Scan QR Code to checkin guest</div>
     <div class="qrcode-holder mt-3">
       <qrcode-stream @decode="onDecode" @init="onInit" />
     </div>
-    <b-alert
-      variant="danger"
-      class="mt-4"
-      :show="!isNullOrEmpty(error) ? 500 : false"
-      >{{ error }}</b-alert
-    >
+    <b-alert variant="danger" class="mt-4" :show="!isNullOrEmpty(error)">{{ error }}</b-alert>
     <div class="qrcode-container d-flex flex-row align-items-center">
       <div class="qrcode-content d-flex flex-column align-items-center"></div>
     </div>
@@ -36,15 +29,13 @@
           variant="outline-primary"
           @click="checkinGuest"
           v-if="isNullOrEmpty(guest.checkin) || !guest.checkin"
-          >Checkin</b-button
-        >
+        >Checkin</b-button>
         <b-button
           size="sm"
           variant="outline-success"
           v-else
           @click="closeGuestInformation"
-          >{{ guest.name }} has already checkin</b-button
-        >
+        >{{ guest.name }} has already checkin</b-button>
       </template>
     </b-modal>
   </div>

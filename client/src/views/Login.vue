@@ -88,8 +88,6 @@ export default {
       const self = this;
       var login = await LoginService.getLogin(self.username);
 
-      if (_.isArray(login)) login = login[0];
-
       await self.$store.dispatch("setLogin", login);
       let email = _.get(login, "email");
 

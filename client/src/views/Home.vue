@@ -1,25 +1,38 @@
 <template>
   <div class="main d-flex flex-column position-absolute">
-    <b-navbar type="dark" variant="info">
+    <b-navbar toggleable="lg" type="dark" variant="info">
       <b-navbar-brand href="#">Attendance Management</b-navbar-brand>
-      <b-navbar-nav v-if="window.width >= 768">
-        <b-nav-item :to="{ path: '/home/layout' }">Layout</b-nav-item>
-        <b-nav-item :to="{ path: '/home/guest-list' }">Guests List</b-nav-item>
-        <b-nav-item :to="{ path: '/home/settings' }">Settings</b-nav-item>
-      </b-navbar-nav>
-      <b-navbar-nav class="ml-auto">
-        <b-button
-          variant="outline-dark"
-          @click="logout"
-          v-if="window.width >= 768"
-          class="removeButtonBorder"
-        >
-          <font-awesome-icon icon="sign-out-alt" />
-        </b-button>
-        <b-button id="showActions" variant="outline-dark" v-else class="removeButtonBorder">
-          <font-awesome-icon icon="ellipsis-h" />
-        </b-button>
-      </b-navbar-nav>
+      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+
+      <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav>
+          <b-nav-item
+            :to="{ path: '/home/qrcode' }"
+            @click="setActiveLink(1)"
+            :active="(activeLink === 1)"
+          >QR Code Checkin</b-nav-item>
+          <b-nav-item
+            :to="{ path: '/home/layout' }"
+            @click="setActiveLink(1)"
+            :active="(activeLink === 1)"
+          >Layout</b-nav-item>
+          <b-nav-item
+            :to="{ path: '/home/guest-list' }"
+            @click="setActiveLink(2)"
+            :active="(activeLink === 2)"
+          >Guests List</b-nav-item>
+          <b-nav-item
+            :to="{ path: '/home/settings' }"
+            @click="setActiveLink(3)"
+            :active="(activeLink === 3)"
+          >Settings</b-nav-item>
+        </b-navbar-nav>
+        <b-navbar-nav class="ml-auto">
+          <b-button variant="outline-dark" @click="logout" class="removeButtonBorder">
+            <font-awesome-icon icon="sign-out-alt" />
+          </b-button>
+        </b-navbar-nav>
+      </b-collapse>
     </b-navbar>
     <b-popover
       target="showActions"
@@ -50,18 +63,11 @@ export default {
   mixins: [app],
   data() {
     return {
-      window: {
-        width: 0,
-        height: 0
-      },
+      activeLink: 0,
       showActionsVisible: false
     };
   },
   methods: {
-    handleResize() {
-      this.window.width = window.innerWidth;
-      this.window.height = window.innerHeight;
-    },
     logout() {
       const self = this;
       self.$store.dispatch("clearState");
@@ -77,18 +83,18 @@ export default {
       self.$router.push({
         path: value
       });
+    },
+    setActiveLink(index) {
+      const self = this;
+
+      self.activeLink = index;
     }
-  },
-  created() {
-    window.addEventListener("resize", this.handleResize);
-    this.handleResize();
-  },
-  destroyed() {
-    window.removeEventListener("resize", this.handleResize);
   },
   mounted() {
     const self = this;
     const email = self.$store.getters.getEmail;
+
+    self.activeLink = 1;
 
     if (self.isNullOrEmpty(email))
       self.$router.push({
