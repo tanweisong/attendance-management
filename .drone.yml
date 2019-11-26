@@ -1,0 +1,31 @@
+kind: pipeline
+type: docker
+name: test backend
+
+steps:
+  -name: build
+  image: node
+  commands:
+    - npm install
+    - npm run dev
+
+---
+kind: pipeline
+type: docker
+name: test frontend
+
+steps:
+  - name: build
+    image: node
+    commands:
+      - cd client
+      - npm install
+      - npm run serve
+
+trigger:
+  repo:
+    - attendance-management
+  branch:
+    - master
+  event:
+    - push
